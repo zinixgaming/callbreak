@@ -6,51 +6,61 @@ import {
   setRoundTableData,
   getTableData,
 } from '../../../../gameTable/utils';
-import { EVENTS, NUMERICAL, TABLE_STATE } from '../../../../../constants';
+import {EVENTS, NUMERICAL, TABLE_STATE} from '../../../../../constants';
 import CommonEventEmitter from '../../../../commonEventEmitter';
 import Scheduler from '../../../../scheduler';
 import changeTurn from './changeTurn';
-import { playerPlayingDataIf } from '../../../../interface/playerPlayingTableIf';
-import { playingTableIf } from '../../../../interface/playingTableIf';
-import { roundTableIf } from '../../../../interface/roundTableIf';
+import {playerPlayingDataIf} from '../../../../interface/playerPlayingTableIf';
+import {playingTableIf} from '../../../../interface/playingTableIf';
+import {roundTableIf} from '../../../../interface/roundTableIf';
 import cancelBattle from '../../../cancelBattle';
 import Errors from '../../../../errors';
-import { formatUserBidShow } from '../../playHelper';
-import { getRandomNumber } from '../../../../FTUE/common';
+import {formatUserBidShow} from '../../playHelper';
+import {getRandomNumber} from '../../../../FTUE/common';
+import {calculateBotBid} from '../../../../playBot/utils';
 
 // call this function on Bid Turn Timer Expire
-async function setBidOnTurnExpire(
-  tableData: playingTableIf,
-) {
-  const { _id: tableId, currentRound, isFTUE } = tableData;
-  const { getLock } = global;
+async function setBidOnTurnExpire(tableData: playingTableIf) {
+  const {_id: tableId, currentRound, isFTUE} = tableData;
+  const {getLock} = global;
   const setBidOnTurnExpireLock = await getLock.acquire([tableId], 2000);
   try {
-    let bid = 1; // default build
-    if (isFTUE) bid = await getRandomNumber(1, 3);
-
+    // Bid calculation will be done per player based on their cards
     logger.info(tableId, 'setBidOnTurnExpire : Expire Bid Turn ');
     // Cancel Bid Turn Timer Scheduler
-    await Scheduler.cancelJob.playerBidTurnTimerCancel(`${tableId}:${currentRound}`);
-    
+    await Scheduler.cancelJob.playerBidTurnTimerCancel(
+      `${tableId}:${currentRound}`,
+    );
+
     const playTable: playingTableIf = await getTableData(tableId);
     const roundPlayingTable = await getRoundTableData(tableId, currentRound);
-    logger.info(" setBidOnTurnExpire :: playTable :: ==>> ", playTable);
-    logger.info(" setBidOnTurnExpire :: roundPlayingTable :: ==>> ", roundPlayingTable);
+    logger.info(' setBidOnTurnExpire :: playTable :: ==>> ', playTable);
+    logger.info(
+      ' setBidOnTurnExpire :: roundPlayingTable :: ==>> ',
+      roundPlayingTable,
+    );
 
     const playerSeats = roundPlayingTable.seats;
     const playersPlayingData = await Promise.all(
-      Object.keys(playerSeats).map(async (ele) =>
-        getPlayerGamePlay(playerSeats[ele].userId, tableId)
-      )
+      Object.keys(playerSeats).map(async ele =>
+        getPlayerGamePlay(playerSeats[ele].userId, tableId),
+      ),
     );
 
     for (let i = 0; i < playersPlayingData.length; i++) {
-
       const player = playersPlayingData[i];
-      logger.info(" player :;: ==>> ", player);
+      logger.info(' player :;: ==>> ', player);
 
       if (!player.bidTurn && player.bid == NUMERICAL.ZERO) {
+        // Calculate bid based on player's cards using intelligent bot logic
+        let bid = 1; // default bid
+        if (isFTUE) {
+          // For FTUE mode, still use random for simplicity, but you can change this
+          bid = getRandomNumber(1, 4);
+        } else {
+          // Use intelligent bid calculation based on player's current cards
+          bid = calculateBotBid(player.currentCards);
+        }
 
         player.bid = bid;
         player.bidTurn = true;
@@ -68,20 +78,23 @@ async function setBidOnTurnExpire(
           tableId: tableId.toString(),
           data: eventData,
         });
-
       }
     }
 
     /* check all bid select done */
     const playerGamePlaydata = await Promise.all(
-      Object.keys(playerSeats).map(async (ele) =>
-        getPlayerGamePlay(playerSeats[ele].userId, tableId)
-      )
+      Object.keys(playerSeats).map(async ele =>
+        getPlayerGamePlay(playerSeats[ele].userId, tableId),
+      ),
     );
 
     const bidTurnComplete = playerGamePlaydata.every(player => player.bidTurn);
-    logger.info(tableId, 'setBidOnTurnExpire : bidTurnComplete ', bidTurnComplete);
-    
+    logger.info(
+      tableId,
+      'setBidOnTurnExpire : bidTurnComplete ',
+      bidTurnComplete,
+    );
+
     // Bid Turn is Complete
     const nextTurn = roundPlayingTable.currentTurn;
     logger.info(tableId, 'setBidOnTurnExpire : nextTurn ', nextTurn);
@@ -91,7 +104,7 @@ async function setBidOnTurnExpire(
       roundPlayingTable.tableState = TABLE_STATE.ROUND_STARTED;
       const nextTurnPlayerData: playerPlayingDataIf = await getPlayerGamePlay(
         nextTurn,
-        tableId
+        tableId,
       );
       nextTurnPlayerData.isTurn = true;
       await setPlayerGamePlay(nextTurn, tableId, nextTurnPlayerData);
@@ -107,11 +120,11 @@ async function setBidOnTurnExpire(
       });
     }
 
-
     // Change Player Bid Turn
     // changeTurn(tableId.toString());
   } catch (e) {
-    logger.error(tableId,
+    logger.error(
+      tableId,
       `CATCH_ERROR : setBidOnTurnExpire :: tableId:${tableId} :: currentRound: ${currentRound}`,
       e,
     );
