@@ -99,8 +99,10 @@ function initializeRedlock(redisClient: any) {
     retryCount: -1,
     retryDelay: 25,
     retryJitter: 20,
+    automaticExtensionThreshold: 500, // automatically extend locks that are within 500ms of expiring
   });
-  redlock.on('clientError', err => {
+  
+  redlock.on('error', err => {
     logger.error('CATCH_ERROR : RedLock :', err);
   });
 
