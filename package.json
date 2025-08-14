@@ -1,18 +1,21 @@
 {
-  "name": "spades",
+  "name": "mongo-callbreak",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "npx ts-node testing.ts",
-    "start": "npm run build && node build/spades_server.js",
+    "start": "node dist/spades_server.js",
     "local": "ts-node src/spades_server.ts",
     "start-m": "nodemon",
-    "clean": "rimraf build/ ",
-    "copy-files": "copyfiles -u 1 ./src/protos/*.proto build/",
-    "copy-global": "copyfiles ./global.js build/",
+    "clean": "rimraf dist/ ",
+    "copy-files": "copyfiles -u 1 ./src/protos/*.proto dist/",
+    "copy-global": "copyfiles ./global.js dist/",
     "build": "npm run clean && npx tsc && npm run copy-files && npm run copy-global"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "@socket.io/redis-adapter": "^7.1.0",
     "aws-sdk": "^2.1087.0",
