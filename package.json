@@ -1,0 +1,63 @@
+{
+  "name": "callbreak",
+  "version": "1.0.0",
+  "main": "./src/index.js",
+  "scripts": {
+    "tsx": "ts-node --swc",
+    "dev": "nodemon ./src/index.ts",
+    "start": "node dist/index.js",
+    "remove-dist": "rimraf dist",
+    "format": "prettier --write \"./src/**/*.{ts,md,json}\"",
+    "build": "pnpm remove-dist && tsc -p ./tsconfig.build.json",
+    "lint": "eslint \"{src,test}/**/*.ts\" --fix"
+  },
+  "dependencies": {
+    "@socket.io/redis-adapter": "^8.3.0",
+    "aws-sdk": "^2.1692.0",
+    "axios": "^1.11.0",
+    "bull": "^4.16.5",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "javascript-fortuna": "^1.0.10",
+    "joi": "^18.0.0",
+    "joi-oid": "^1.1.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.18.0",
+    "redis": "^5.8.1",
+    "redlock": "^4.2.0",
+    "socket.io": "^4.8.1",
+    "underscore": "^1.13.7",
+    "url": "^0.11.4",
+    "winston": "^3.17.0",
+    "winston-mongodb": "^7.0.0",
+    "winston-timestamp-colorize": "^1.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.33.0",
+    "@swc/core": "^1.13.3",
+    "@types/cors": "^2.8.19",
+    "@types/crypto-js": "^4.2.2",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^24.2.1",
+    "@types/redlock": "^4.0.7",
+    "@types/underscore": "^1.13.0",
+    "eslint": "^9.33.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "globals": "^16.3.0",
+    "nodemon": "^3.1.10",
+    "prettier": "3.6.2",
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.39.1"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=10"
+  },
+  "packageManager": "pnpm@10.14.0"
+}
