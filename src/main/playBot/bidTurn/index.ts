@@ -19,13 +19,15 @@ async function botBidTurn(
   playerGamePlay: playerPlayingDataIf,
   tableData: playingTableIf,
 ) {
-  const { userId } = playerGamePlay;
-  const { _id: tableId, currentRound } = tableData;
-  const { getLock, getConfigData: config } = global;
+  const {userId, currentCards} = playerGamePlay;
+  const {_id: tableId, currentRound} = tableData;
+  const {getLock, getConfigData: config} = global;
   const botBetBidLock = await getLock.acquire([tableId], 2000);
 
   try {
-    const bid = await getRandomNumber(1, 4);
+    const bid = getRandomNumber(1, 4);
+
+    console.log(currentCards);
 
     // Cancel Bid Turn Timer Scheduler
     await Scheduler.cancelJob.playerBidTurnTimerCancel(
