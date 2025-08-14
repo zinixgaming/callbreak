@@ -1,6 +1,6 @@
 import socketAck from '../../../socketAck';
 import CommonEventEmitter from '../../commonEventEmitter';
-import {EVENTS} from '../../../constants';
+import { EVENTS } from '../../../constants';
 
 function heartBeat(data: any, socket: any, ack: any) {
   const response = data.data;

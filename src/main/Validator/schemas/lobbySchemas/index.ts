@@ -1,4 +1,5 @@
-import LobbyEntrySchema from './lobbyEntry';
+
+import LobbyEntrySchema from './lobbyEntry'
 
 const exportObject = {
   LobbyEntrySchema,

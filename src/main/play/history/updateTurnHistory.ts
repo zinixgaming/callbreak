@@ -1,6 +1,6 @@
-import {getTurnHistory, setTurnHistory} from '../../gameTable/utils';
-import {playerPlayingDataIf} from '../../interface/playerPlayingTableIf';
-import {turnDetailsInterface} from '../../interface/turnHistoryIf';
+import { getTurnHistory, setTurnHistory } from '../../gameTable/utils';
+import { playerPlayingDataIf } from '../../interface/playerPlayingTableIf';
+import { turnDetailsInterface } from '../../interface/turnHistoryIf';
 
 async function updateTurnHistory(
   tableId: string,

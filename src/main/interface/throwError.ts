@@ -4,3 +4,4 @@ export interface throwErrorIF {
   title?: string;
   isToastPopup?: boolean;
 }
+

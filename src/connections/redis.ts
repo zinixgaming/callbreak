@@ -1,114 +1,134 @@
-import Redlock from 'redlock';
-import {createClient} from 'redis';
-import {logger, Redis} from '../main';
-import {getConfig} from '../config';
+const redis = require("redis");
+const Redlock = require("redlock");
+import { logger, Redis } from "../main";
+import { getConfig } from "../config";
+import url from "url"
 
 let connectionsMap: any = null;
-let redlock: Redlock | null = null;
 
-const connectionCallback = async () => {
-  const {
-    REDIS_HOST,
-    REDIS_PASSWORD,
-    REDIS_PORT,
-    PUBSUB_REDIS_HOST,
-    PUBSUB_REDIS_PORT,
-    PUBSUB_REDIS_PASSWORD,
-    REDIS_DB,
-    REDIS_CONNECTION_URL,
-    NODE_ENV,
-  } = getConfig();
-
-  const redisConfig = {
-    socket: {
-      host: REDIS_HOST,
-      port: Number(REDIS_PORT),
-    },
-    password: REDIS_PASSWORD || undefined,
-    database: REDIS_DB ? Number(REDIS_DB) : undefined,
-  };
-
-  const pubSubRedisConfig = {
-    socket: {
-      host: PUBSUB_REDIS_HOST,
-      port: Number(PUBSUB_REDIS_PORT),
-    },
-    password: PUBSUB_REDIS_PASSWORD || undefined,
-    database: REDIS_DB ? Number(REDIS_DB) : undefined,
-  };
-
-  let client;
-  let pubClient;
-
-  if (NODE_ENV === 'PRODUCTION' && REDIS_CONNECTION_URL) {
-    logger.info(
-      'PRODUCTION :: REDIS_CONNECTION_URL ::>> ',
+const connectionCallback = async () =>
+  new Promise((resolve, reject) => {
+    const {
+      REDIS_HOST,
+      REDIS_PASSWORD,
+      REDIS_PORT,
+      PUBSUB_REDIS_HOST,
+      PUBSUB_REDIS_PORT,
+      PUBSUB_REDIS_PASSWORD,
+      REDIS_DB,
       REDIS_CONNECTION_URL,
-    );
+      NODE_ENV
+    } = getConfig();
 
-    const parsedUrl = new URL(REDIS_CONNECTION_URL);
-    client = createClient({
-      socket: {
-        host: parsedUrl.hostname,
-        port: Number(parsedUrl.port),
-      },
-      password: parsedUrl.password || undefined,
-      database: REDIS_DB ? Number(REDIS_DB) : undefined,
+    let counter = 0;
+    const redisConfig: {
+      host: string;
+      port: number;
+      password?: string;
+    } = {
+      host: REDIS_HOST,
+      port: REDIS_PORT,
+    };
+
+    const pubSubRedisConfig: {
+      host: string;
+      port: number;
+      password?: string;
+    } = {
+      host: PUBSUB_REDIS_HOST,
+      port: PUBSUB_REDIS_PORT,
+    };
+
+    if (REDIS_PASSWORD !== "") redisConfig.password = REDIS_PASSWORD;
+    if (PUBSUB_REDIS_PASSWORD !== "")
+      pubSubRedisConfig.password = PUBSUB_REDIS_PASSWORD;
+
+    console.log("redis data :: ", redisConfig, "NODE_ENV  :>>" , NODE_ENV);
+
+    let client: any;
+    let pubClient: any;
+    if (NODE_ENV === "PRODUCTION") {
+      console.log('PRODUCTION :: REDIS_CONNECTION_URL ::>> ', REDIS_CONNECTION_URL);
+
+      const { port, hostname, auth } = url.parse(REDIS_CONNECTION_URL);
+      client = redis.createClient({ host : hostname, port : port, db : Number(REDIS_DB) });
+      pubClient = redis.createClient({ host : hostname, port : port, db : Number(REDIS_DB) });
+      
+
+    } else {
+      client = redis.createClient(redisConfig);
+      pubClient = redis.createClient(pubSubRedisConfig);
+      if (REDIS_DB !== "") {
+        client.select(REDIS_DB);
+        pubClient.select(REDIS_DB);
+      }
+    }
+
+    const subClient = pubClient.duplicate();
+
+    function check() {
+      if (counter === 2) {
+        connectionsMap = { client, pubClient, subClient };
+        resolve(connectionsMap);
+      }
+    }
+
+    client.flushdb(function (err: any, succeeded: any) {
+      logger.info("FLUSH-DB ===>>", succeeded); 
     });
 
-    pubClient = createClient({
-      socket: {
-        host: parsedUrl.hostname,
-        port: Number(parsedUrl.port),
-      },
-      password: parsedUrl.password || undefined,
-      database: REDIS_DB ? Number(REDIS_DB) : undefined,
+    client.on("ready", () => {
+      logger.info("Redis connected successfully.");
+      Redis.init(client);
+      counter += 1;
+      check();
     });
-  } else {
-    client = createClient(redisConfig);
-    pubClient = createClient(pubSubRedisConfig);
-  }
 
-  const subClient = pubClient.duplicate();
+    client.on("error", (error: any) => {
+      logger.error("CATCH_ERROR : Redis Client error:", error);
+      reject(error);
+    });
 
-  // Connect all clients
-  await Promise.all([
-    client.connect(),
-    pubClient.connect(),
-    subClient.connect(),
-  ]);
+    pubClient.on("ready", () => {
+      logger.info("pubClient connected successfully.");
+      counter += 1;
+      check();
+    });
 
-  // Flush DB only if needed (optional)
-  await client.flushDb();
-  logger.info('FLUSH-DB ===>> Success');
+    pubClient.on("error", (error: any) => {
+      logger.error("CATCH_ERROR : pubClient Client error:", error);
+      reject(error);
+    });
+  });
 
-  logger.info('Redis connected successfully.');
-  Redis.init(client);
+let redlock: any = null;
 
-  logger.info('pubClient connected successfully.');
-
-  connectionsMap = {client, pubClient, subClient};
-  return connectionsMap;
-};
+function registerRedlockError() {
+  redlock.on("CATCH_ERROR : RedLock : error", logger.error);
+}
 
 function initializeRedlock(redisClient: any) {
   if (redlock) return redlock;
 
   redlock = new Redlock([redisClient], {
-    driftFactor: 0.01,
+    // The expected clock drift; for more details see:
+    driftFactor: 0.01, // multiplied by lock ttl to determine drift time
+    // ∞ retries
     retryCount: -1,
-    retryDelay: 25,
-    retryJitter: 20,
-    automaticExtensionThreshold: 500, // automatically extend locks that are within 500ms of expiring
-  });
-  
-  redlock.on('error', err => {
-    logger.error('CATCH_ERROR : RedLock :', err);
+    // the time in ms between attempts
+    retryDelay: 25, // time in ms
+    // the max time in ms randomly added to retries
+    // to improve performance under high contention
+    retryJitter: 20, // time in ms
+    // The minimum remaining time on a lock before an extension is automatically
+    // attempted with the using API.
+    automaticExtensionThreshold: 500, // time in ms
   });
 
+  registerRedlockError();
   return redlock;
 }
 
 const init = async () => connectionsMap || connectionCallback();
 
-export = {init, initRedlock: initializeRedlock, getLock: () => redlock};
+export = { init, initRedlock: initializeRedlock, getLock: () => redlock };

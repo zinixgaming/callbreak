@@ -1,12 +1,15 @@
-import 'dotenv/config';
+require('dotenv').config();
+import logger from './main/logger';
 
 const processEnv = process.env;
 let configData: any = null;
 
 function getEnvJSON(env: any) {
+  // logger.info('env :::: ', env);
+
   const NODE_ENV = `NODE_ENV`;
-  const serverType = `SERVER_TYPE`;
-  const serverPort = `SERVER_PORT`;
+  const serverType = `${env}_SERVER_TYPE`;
+  const serverPort = `${env}_HTTP_SERVER_PORT`;
   const redisHost = `${env}_REDIS_HOST`;
   const redisPassword = `${env}_REDIS_PASSWORD`;
   const redisPort = `${env}_REDIS_PORT`;
@@ -117,13 +120,19 @@ function getEnvJSON(env: any) {
     MAX_BID: 13,
     MORE_THEN_DISTANCE_TO_JOIN: 50,
     ROBOT_WAITING_TIMER: 5,
+
   });
+
 }
 
-export const getConfig = () => {
-  const {NODE_ENV} = process.env;
-  configData = getEnvJSON(NODE_ENV);
-  return configData;
-};
+function getConfig() {
+  const { NODE_ENV } = process.env;
 
-export default {getConfig};
+  configData = getEnvJSON(NODE_ENV);
+  // logger.info('start local server');
+
+  return configData;
+}
+
+const exportObject = { getConfig };
+export = exportObject;

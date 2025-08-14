@@ -12,8 +12,7 @@ const rejoinTableTimerExpire = async (data: any) => {
 
     leaveTable(tableId, 'DISCONECT', socket);
   } catch (e) {
-    logger.error(
-      tableId,
+    logger.error(tableId, 
       `CATCH_ERROR : rejoinTableTimerExpire :: tableId: ${tableId} :: userId: ${userId}`,
       data,
       e,

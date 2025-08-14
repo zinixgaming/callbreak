@@ -1,6 +1,6 @@
-import {NUMERICAL, REDIS} from '../../constants';
+import { NUMERICAL, REDIS } from '../../constants';
 
-const {PREFIX} = REDIS;
+const { PREFIX } = REDIS;
 
 class RedisService {
   public redisCommand: any;
@@ -42,9 +42,10 @@ class RedisService {
   async getAllValueFromHashKeyFeild(key: any) {
     const hashKey = `${PREFIX.HASH}:${key}`;
     const resStr = await this.redisCommand.HASH.hgetall(hashKey);
-    return resStr;
+    return resStr
     // return JSON.parse(resStr) || {};
   }
+
 
   /* list queries */
   async pushIntoQueue(key: any, element: any) {
@@ -59,25 +60,18 @@ class RedisService {
     return JSON.parse(resStr);
   }
 
-  async remFromQueue(key: any, tableId: string) {
-    const resStr = await this.redisCommand.QUEUE.lrem(
-      `${PREFIX.QUEUE}:${key}`,
-      `${NUMERICAL.ZERO}`,
-      JSON.stringify(tableId),
-    );
+  async remFromQueue(key: any, tableId : string) {
+    const resStr = await this.redisCommand.QUEUE.lrem(`${PREFIX.QUEUE}:${key}`, `${NUMERICAL.ZERO}`, JSON.stringify(tableId));
     return JSON.parse(resStr);
   }
 
   async getValueFromIndexFromQueue(key: any, index: number) {
-    const resStr = await this.redisCommand.QUEUE.lindex(
-      `${PREFIX.QUEUE}:${key}`,
-      index,
-    );
+    const resStr = await this.redisCommand.QUEUE.lindex(`${PREFIX.QUEUE}:${key}`, index) ;
     return JSON.parse(resStr);
   }
 
   async getLengthfromQueue(key: any) {
-    const resStr = await this.redisCommand.QUEUE.llen(`${PREFIX.QUEUE}:${key}`);
+    const resStr = await this.redisCommand.QUEUE.llen(`${PREFIX.QUEUE}:${key}`) ;
     console.log('resStr :>>>> ', resStr);
     return JSON.parse(resStr);
   }

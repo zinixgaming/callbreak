@@ -1,4 +1,4 @@
-import Joi from 'joi';
+const Joi = require('joi');
 
 const formatStartUserBidTurnSchema = Joi.object()
   .keys({

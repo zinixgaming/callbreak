@@ -1,9 +1,9 @@
-import Bull from 'bull';
-import logger from '../../logger';
-import {getConfig} from '../../../config';
-import commonEventEmitter from '../../commonEventEmitter';
-import {PLAYER_TURN_TIMER_CANCELLED} from '../../../constants/eventEmitter';
-import url from 'url';
+import Bull from "bull"
+import logger from "../../logger";
+import { getConfig } from "../../../config";
+import commonEventEmitter from "../../commonEventEmitter";
+import { PLAYER_TURN_TIMER_CANCELLED } from "../../../constants/eventEmitter";
+import url from "url"
 
 const {
   SCHEDULER_REDIS_PORT,
@@ -11,20 +11,20 @@ const {
   SCHEDULER_REDIS_HOST,
   SCHEDULER_REDIS_PASSWORD,
   REDIS_CONNECTION_URL,
-  NODE_ENV,
+  NODE_ENV
 } = getConfig();
-const log: {host: string; port: number; password?: string; db?: number} = {
+const log: { host: string; port: number; password?: string; db?: number } = {
   host: SCHEDULER_REDIS_HOST,
   port: SCHEDULER_REDIS_PORT,
-  db: REDIS_DB,
+  db: REDIS_DB
 };
-if (SCHEDULER_REDIS_PASSWORD !== '') log.password = SCHEDULER_REDIS_PASSWORD;
-if (REDIS_DB !== '') log.db = REDIS_DB;
+if (SCHEDULER_REDIS_PASSWORD !== "") log.password = SCHEDULER_REDIS_PASSWORD;
+if (REDIS_DB !== "") log.db = REDIS_DB;
 
 let playerTurnTimerQueue: any;
-if (NODE_ENV === 'PRODUCTION') {
-  const {port, hostname, auth} = url.parse(REDIS_CONNECTION_URL);
-  // playerTurnTimerQueue = new Bull('startTurnTimer', { redis: { host: hostname || "localhost", port: Number(port), db: Number(REDIS_DB) } });
+if (NODE_ENV === "PRODUCTION") {
+  const { port, hostname, auth } = url.parse(REDIS_CONNECTION_URL);
+  // playerTurnTimerQueue = new Bull('startTurnTimer', { redis: { host: hostname, port: port, db: Number(REDIS_DB) } });
   playerTurnTimerQueue = new Bull('startTurnTimer', REDIS_CONNECTION_URL);
   // console.log('playerTurnTimerQueue :>> ', playerTurnTimerQueue);
 } else {
@@ -43,7 +43,7 @@ const playerTurnTimerCancel = async (jobId: string) => {
       commonEventEmitter.emit(PLAYER_TURN_TIMER_CANCELLED, jobId);
     }
   } catch (e) {
-    logger.error('CATCH_ERROR : playerTurnTimerCancel', jobId, e);
+    logger.error("CATCH_ERROR : playerTurnTimerCancel", jobId, e);
   }
 };
 

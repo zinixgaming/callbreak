@@ -1,4 +1,4 @@
-import Joi from 'joi';
+const Joi = require('joi');
 import logger from '../../logger';
 import {
   cardThrowRequestIf,
@@ -18,7 +18,7 @@ import {
   userRejoinSchema,
   userJoinLobbySchema,
 } from '../schemas/requestSchemas';
-import {showUserScoreIf} from '../../interface/userScoreIf';
+import { showUserScoreIf } from '../../interface/userScoreIf';
 
 async function signUpValidator(
   data: signUpRequestIf,
@@ -27,13 +27,7 @@ async function signUpValidator(
     Joi.assert(data, signUpSchema);
     return data;
   } catch (error) {
-    logger.error(
-      data.userId,
-      'CATCH_ERROR : signUpValidator :: ',
-      error,
-      '-',
-      data,
-    );
+    logger.error(data.userId, 'CATCH_ERROR : signUpValidator :: ', error, '-', data);
     throw new Errors.InvalidInput(error);
   }
 }
@@ -69,13 +63,7 @@ async function leaveTableValidator(
     Joi.assert(data, leaveTableSchema);
     return data;
   } catch (error) {
-    logger.error(
-      data.tableId,
-      'CATCH_ERROR : leaveTableValidator :: ',
-      error,
-      '-',
-      data,
-    );
+    logger.error(data.tableId, 'CATCH_ERROR : leaveTableValidator :: ', error, '-', data);
     throw new Errors.InvalidInput(error);
   }
 }
@@ -87,13 +75,7 @@ async function showScoreValidator(
     Joi.assert(data, showScoreBoardSchema);
     return data;
   } catch (error) {
-    logger.error(
-      data.tableId,
-      'CATCH_ERROR : showScoreValidator :: ',
-      error,
-      '-',
-      data,
-    );
+    logger.error(data.tableId, 'CATCH_ERROR : showScoreValidator :: ', error, '-', data);
     throw new Errors.InvalidInput(error);
   }
 }
@@ -105,13 +87,7 @@ async function userRejoinValidator(
     Joi.assert(data, userRejoinSchema);
     return data;
   } catch (error) {
-    logger.error(
-      data.userId,
-      'CATCH_ERROR : userRejoinValidator :: ',
-      error,
-      '-',
-      data,
-    );
+    logger.error(data.userId, 'CATCH_ERROR : userRejoinValidator :: ', error, '-', data);
     throw new Errors.InvalidInput(error);
   }
 }

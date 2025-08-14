@@ -1,7 +1,7 @@
 import logger from '../../logger';
-import {getTurnHistory, setTurnHistory} from '../../gameTable/utils';
-import {userDetailsIf} from '../../interface/turnHistoryIf';
-import {userScoreIf} from '../../interface/userScoreIf';
+import { getTurnHistory, setTurnHistory } from '../../gameTable/utils';
+import { userDetailsIf } from '../../interface/turnHistoryIf';
+import { userScoreIf } from '../../interface/userScoreIf';
 
 async function updateBidHistory(
   tableId: string,
@@ -12,10 +12,13 @@ async function updateBidHistory(
   const turnHistory = await getTurnHistory(tableId, roundNumber);
   let history;
   logger.info(tableId, 'updateBidHistory :: turnHistory ::>', turnHistory);
-  if (turnHistory !== null && typeof turnHistory.userDetails !== 'undefined') {
+  if (
+    typeof turnHistory !== null &&
+    typeof turnHistory.userDetails !== 'undefined'
+  ) {
     const userDetailsObj: userDetailsIf = turnHistory.userDetails;
 
-    userScore.forEach(playerScore => {
+    userScore.forEach((playerScore) => {
       userDetailsObj[`${playerScore.userId}`] = {
         bidsMade: playerScore.bid,
         bidsWon: playerScore.hands,

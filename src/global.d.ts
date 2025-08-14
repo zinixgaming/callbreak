@@ -1,3 +1,3 @@
 // declare var global: typeof globalThis;
-declare let global: InitialData;
+declare var global: InitialData;
 globalThis.global = {};

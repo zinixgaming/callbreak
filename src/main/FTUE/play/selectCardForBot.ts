@@ -1,4 +1,4 @@
-import {NUMERICAL} from '../../../constants';
+import { NUMERICAL } from '../../../constants';
 
 const selectCardForBot = (currentCards: string[], turnCount: number) => {
   let card = '';

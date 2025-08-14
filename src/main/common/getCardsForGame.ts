@@ -1,6 +1,6 @@
-import fortuna from 'javascript-fortuna';
-import _ from 'underscore';
-import {SINGLE_DECK, PLAYER_STATE} from '../../constants';
+const fortuna = require('javascript-fortuna');
+const _ = require('underscore');
+import { SINGLE_DECK, PLAYER_STATE } from '../../constants';
 
 fortuna.init();
 
@@ -17,7 +17,7 @@ async function shuffleCards(cards: string[]) {
 
 async function getCardsForGame(playerInfo: any, maximumSeats: any) {
   /** club,diamond,heart,spade */
-  const cards: string[] = [...SINGLE_DECK];
+  let cards: string[] = [...SINGLE_DECK];
 
   // giving 13 cards for each player
   const allUsersCards: Array<string[]> = [];

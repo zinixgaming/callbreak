@@ -1,10 +1,10 @@
-import {createLogger} from 'winston';
-import {NUMERICAL} from '../../constants';
+const { createLogger } = require('winston');
+import { NUMERICAL } from '../../constants';
 import config from './config/config';
 import level from './config/level';
-import {formatLogMessages} from './helper';
-import {getConfig} from '../../config';
-const {NODE_ENV} = getConfig();
+import { formatLogMessages } from './helper';
+import { getConfig } from "../../config";
+const { NODE_ENV } = getConfig();
 
 const winston = createLogger(config);
 
@@ -28,8 +28,7 @@ const logger = (type: any, ...messages: any) => {
   // }
 
   // let isLoganable = true;
-  const isLoggable = true;
-  if (isLoggable) {
+  if (true) {
     switch (type) {
       case level.warn:
         winston.warn(message);
@@ -52,7 +51,7 @@ const logger = (type: any, ...messages: any) => {
         break;
     }
   }
-  return {type, message};
+  return { type, message };
 };
 
 export = logger;

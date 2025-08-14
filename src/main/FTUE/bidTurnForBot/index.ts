@@ -5,29 +5,29 @@ import {
   getRoundTableData,
   setRoundTableData,
 } from '../../gameTable/utils';
-import {EVENTS} from '../../../constants';
+import { EVENTS } from '../../../constants';
 import CommonEventEmitter from '../../commonEventEmitter';
 import Scheduler from '../../scheduler';
 import changeTurn from '../../play/helpers/turn/bidTurn/changeTurn';
-import {playerPlayingDataIf} from '../../interface/playerPlayingTableIf';
-import {playingTableIf} from '../../interface/playingTableIf';
-import {roundTableIf} from '../../interface/roundTableIf';
+import { playerPlayingDataIf } from '../../interface/playerPlayingTableIf';
+import { playingTableIf } from '../../interface/playingTableIf';
+import { roundTableIf } from '../../interface/roundTableIf';
 import cancelBattle from '../../play/cancelBattle';
 import Errors from '../../errors';
-import {formatUserBidShow} from '../../play/helpers/playHelper';
-import {getRandomNumber} from '../common';
+import { formatUserBidShow } from '../../play/helpers/playHelper';
+import { getRandomNumber } from '../common';
 
 // call this function on Bid Turn For Bot in FTUE
 async function bidTurnForBot(
   playerGamePlay: playerPlayingDataIf,
   tableData: playingTableIf,
 ) {
-  const {userId} = playerGamePlay;
-  const {_id: tableId, currentRound} = tableData;
-  const {getLock} = global;
+  const { userId } = playerGamePlay;
+  const { _id: tableId, currentRound } = tableData;
+  const { getLock } = global;
   const bidTurnForBotLock = await getLock.acquire([tableId], 2000);
   try {
-    const bid = getRandomNumber(1, 3);
+    const bid = await getRandomNumber(1, 3);
 
     logger.info('bidTurnForBot : Expire Bid Turn ');
     // Cancel Bid Turn Timer Scheduler

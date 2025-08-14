@@ -1,4 +1,0 @@
-{
-  "ext": "ts,json",
-  "execMap": {"ts": "pnpm tsx"}
-}

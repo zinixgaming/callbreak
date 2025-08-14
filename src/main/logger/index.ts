@@ -1,5 +1,5 @@
-import level from './config/level';
-import logger from './logger';
+const level = require('./config/level');
+const logger = require('./logger');
 
 /**
  * exported functions

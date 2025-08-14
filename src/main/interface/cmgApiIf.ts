@@ -14,7 +14,7 @@ export interface walletDebitIf {
 export interface multiPlayerWinnScoreIf {
   tableId: string;
   tournamentId: string;
-  playersScore: formateScoreIf[];
+  playersScore: formateScoreIf[]
 }
 
 export interface checkBalanceIf {
@@ -30,6 +30,7 @@ export interface rediusCheckDataRes {
   createdAt: string;
   updatedAt: string;
 }
+
 
 export interface markCompletedGameStatusIf {
   tableId: string;
@@ -55,7 +56,7 @@ export interface addLobbyDetailsIf {
   lobbyId: string;
   entryFee: number;
   winningAmount: string;
-  noOfPlayer: string;
+  noOfPlayer: string
   totalRound: number;
   createdAt: string;
 }
@@ -88,19 +89,19 @@ export interface addGameRunningStatusIf {
 }
 
 export interface getMatchDataIf {
-  userId: string;
-  tableId: string;
+  userId: string,
+  tableId: string
 }
 
 export interface usergetWinningBreakdownIf {
-  roomName: string;
-  userId: string;
-  token: string;
+  roomName: string,
+  userId: string,
+  token: string
 }
 
 export interface getBotIf {
   isBotAvailable: boolean;
-  botDetails: botUser;
+  botDetails: botUser
 }
 
 export interface botUser {

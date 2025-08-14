@@ -1,6 +1,6 @@
-import {CARD_SEQUENCE} from '../../../constants';
+import { CARD_SEQUENCE } from '../../../constants';
 import logger from '../../logger';
-import {getCardNumber} from '../../play/helpers/turn/cardThrow/utile';
+import { getCardNumber } from '../../play/helpers/turn/cardThrow/utile';
 
 // tack second turn for bot
 async function secondTurn(
@@ -17,7 +17,7 @@ async function secondTurn(
       }
       return '';
     })
-    .filter(e => e);
+    .filter((e) => e);
 
   const getSpadesCard: string[] = userCards
     .map((fcard: string) => {
@@ -27,7 +27,7 @@ async function secondTurn(
     .filter((e: string) => e);
 
   const spadesHighCardCheck: string | undefined = roundCurrentCards.find(
-    fcard => {
+    (fcard) => {
       return (
         fcard.charAt(0) === CARD_SEQUENCE.CARD_SPADES &&
         cardSequence !== CARD_SEQUENCE.CARD_SPADES
@@ -44,19 +44,19 @@ async function secondTurn(
         a.split('-')[0] === CARD_SEQUENCE.CARD_SPADES
           ? 14
           : a.split('-')[0] === CARD_SEQUENCE.CARD_SPADES
-            ? Number(a.split('-')[1])
-            : 0;
+          ? Number(a.split('-')[1])
+          : 0;
       const cardB =
         Number(b.split('-')[1]) === 1 &&
         b.split('-')[0] === CARD_SEQUENCE.CARD_SPADES
           ? 14
           : b.split('-')[0] === CARD_SEQUENCE.CARD_SPADES
-            ? Number(b.split('-')[1])
-            : 0;
+          ? Number(b.split('-')[1])
+          : 0;
       return cardB - cardA;
     });
     const userHaveSpadeHighCardOrNot = userCards.find(
-      dcard =>
+      (dcard) =>
         dcard.charAt(0) === CARD_SEQUENCE.CARD_SPADES &&
         getCardNumber(dcard) > getCardNumber(roundCurrentCards[0]),
     );
@@ -67,13 +67,13 @@ async function secondTurn(
     } else {
       // bot not have a high spades card
       const noSpadesCard = userCards.find(
-        dcard => dcard.charAt(0) !== CARD_SEQUENCE.CARD_SPADES,
+        (dcard) => dcard.charAt(0) !== CARD_SEQUENCE.CARD_SPADES,
       );
       // non spades card
       if (noSpadesCard) hightCardCheck = [noSpadesCard];
       else {
         const spadesCard = userCards.find(
-          dcard => dcard.charAt(0) === CARD_SEQUENCE.CARD_SPADES,
+          (dcard) => dcard.charAt(0) === CARD_SEQUENCE.CARD_SPADES,
         );
         // any spades card
         if (spadesCard) hightCardCheck = [spadesCard];

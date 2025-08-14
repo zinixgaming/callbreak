@@ -1,4 +1,4 @@
-import {grpcRequestsMapIF} from '../interface/grpcIf';
+import { grpcRequestsMapIF } from '../interface/grpcIf';
 
 const grpcRequestsMap: grpcRequestsMapIF = {};
 
@@ -18,5 +18,5 @@ function decr(key: string): number {
 }
 
 const getGrpcRequestsMap = () => grpcRequestsMap;
-const exportObject = {incr, decr, getGrpcRequestsMap};
+const exportObject = { incr, decr, getGrpcRequestsMap };
 export = exportObject;

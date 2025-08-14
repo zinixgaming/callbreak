@@ -1,6 +1,7 @@
+/* eslint-disable node/no-unsupported-features/es-syntax */
 import logger from '../../logger';
 import CommonEventEmitter from '../../commonEventEmitter';
-import {REJOIN_TIMER_EXPIRED} from '../../../constants/eventEmitter';
+import { REJOIN_TIMER_EXPIRED } from '../../../constants/eventEmitter';
 
 const rejoinTimerProcess = async (job: any) => {
   try {

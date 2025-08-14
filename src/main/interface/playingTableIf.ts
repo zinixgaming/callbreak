@@ -8,8 +8,8 @@ export interface defaultPlayingTableIf {
   userTurnTimer: number;
   bootValue: number;
   isFTUE: boolean;
-  winningAmount: string;
-  isUseBot: boolean;
+  winningAmount : string;
+  isUseBot : boolean;
 }
 
 export interface playingTableIf {
@@ -26,7 +26,7 @@ export interface playingTableIf {
   potValue: number;
   winner: Array<any>;
   isFTUE: boolean;
-  winningAmount: string;
+  winningAmount : string;
   createdAt: Date;
   updatedAt: Date;
 }

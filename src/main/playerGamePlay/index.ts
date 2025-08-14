@@ -1,5 +1,5 @@
-import {getPlayerGamePlay, setPlayerGamePlay} from '../gameTable/utils';
-import {userSeatsIf} from '../interface/roundTableIf';
+import { getPlayerGamePlay, setPlayerGamePlay } from '../gameTable/utils';
+import { userSeatsIf } from '../interface/roundTableIf';
 
 // All User Card Add In Player Data
 async function updateCardsByRoundId(
@@ -7,7 +7,7 @@ async function updateCardsByRoundId(
   usersCards: string[][],
   tableId: string,
 ) {
-  const playersGamePromise = await Object.keys(seats).map(async seat =>
+  const playersGamePromise = await Object.keys(seats).map(async (seat) =>
     getPlayerGamePlay(seats[seat].userId, tableId),
   );
 
@@ -17,6 +17,7 @@ async function updateCardsByRoundId(
       ...playerGameData,
       currentCards: usersCards[i],
       roundCards: usersCards[i],
+
     };
     setPlayerGamePlay(seats[`s${i}`].userId, tableId, updatedObj);
     return updatedObj;

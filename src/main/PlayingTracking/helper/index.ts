@@ -1,11 +1,11 @@
-import addLobbyTracking from './addLobbyTracking';
-import setCurrentRoundData from './setCurrentRoundData';
+import addLobbyTracking from './addLobbyTracking'
+import setCurrentRoundData from './setCurrentRoundData'
 import cronJob from './cronJobSchedule';
 
 const exportObject = {
-  addLobbyTracking,
-  setCurrentRoundData,
-  cronJob,
+    addLobbyTracking,
+    setCurrentRoundData,
+    cronJob
 };
 
-export = exportObject;
+export = exportObject

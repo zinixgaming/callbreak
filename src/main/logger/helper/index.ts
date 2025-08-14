@@ -3,7 +3,7 @@
  * @param {Object} message object to format
  * @returns {String} in format " key: value, "
  */
-const removeEscapeCharacters = (message: any) => {
+const removeEscapeCharacters = (message:any) => {
   // stringify return undefined type when passed undefined, returning empty string instead
   let value = message;
   if (message instanceof Error) {
@@ -19,7 +19,7 @@ const removeEscapeCharacters = (message: any) => {
  *
  * @param {Array} messages containing text to print
  */
-const formatLogMessages = (messages: any) => {
+const formatLogMessages = (messages:any) => {
   let returnValue = '';
 
   for (let i = 0; i < messages.length; ++i) {

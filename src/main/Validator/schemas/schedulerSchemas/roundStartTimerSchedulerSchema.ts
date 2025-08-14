@@ -1,6 +1,6 @@
-import {playingTableSchema, roundTableSchema} from '../methodSchemas';
+import { playingTableSchema, roundTableSchema } from '../methodSchemas';
 
-import Joi from 'joi';
+const Joi = require('joi');
 
 const roundStartTimerSchedulerSchema = Joi.object().keys({
   timer: Joi.number().description('exipire time'),

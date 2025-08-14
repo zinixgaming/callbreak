@@ -1,4 +1,4 @@
-import _ from 'underscore';
+const _ = require('underscore');
 import logger from '../../logger';
 import {
   getRoundTableData,
@@ -15,25 +15,25 @@ import {
   GAME_TYPE,
 } from '../../../constants';
 import Scheduler from '../../scheduler';
-import {formatCollectBootValue} from '../../play/helpers/playHelper';
+import { formatCollectBootValue } from '../../play/helpers/playHelper';
 import CommonEventEmitter from '../../commonEventEmitter';
 import cancelBattle from '../../play/cancelBattle';
 import Errors from '../../errors';
-import {initializeGameplayIf} from '../../interface/schedulerIf';
-import {removeAllPlayingTableAndHistory} from '../../play/leaveTable/helpers';
-import {wallateDebit} from '../../clientsideapi';
-import formatUpdatedUserBalance from '../helper/formatUpdatedUserBalance';
-import {addLobbyTracking} from '../../PlayingTracking/helper';
-import {upadedBalanceIf} from '../../interface/responseIf';
-import {userIf} from '../../interface/userSignUpIf';
+import { initializeGameplayIf } from '../../interface/schedulerIf';
+import { removeAllPlayingTableAndHistory } from '../../play/leaveTable/helpers';
+import { wallateDebit } from "../../clientsideapi"
+import formatUpdatedUserBalance from '../helper/formatUpdatedUserBalance'
+import { addLobbyTracking } from '../../PlayingTracking/helper';
+import { upadedBalanceIf } from '../../interface/responseIf';
+import { userIf } from '../../interface/userSignUpIf';
 import entryFeeDeductManage from '../helper/entryFeeDeductManage';
 
 async function initializeGameplayForFirstRound(data: initializeGameplayIf) {
-  const {getLock, getConfigData: config} = global;
-  const {tableId, roundTableData, tableData} = data;
+  const { getLock, getConfigData: config } = global;
+  const { tableId, roundTableData, tableData } = data;
   logger.debug(tableId, 'initializeGameplayForFirstRound .');
   logger.info(tableId, tableId, data);
-  const {lobbyId, gameId} = tableData;
+  const { lobbyId, gameId } = tableData;
   const initializeGameplayForFirstRoundLock = await getLock.acquire(
     [tableId],
     2000,
@@ -44,22 +44,21 @@ async function initializeGameplayForFirstRound(data: initializeGameplayIf) {
       roundTableData.currentRound,
     );
 
-    logger.info(
-      tableId,
+    logger.info(tableId,
       'initializeGameplayForFirstRound : roundTableDataTemp :: ',
       roundTableDataTemp,
     );
     const currentPlayersInTable = Object.keys(roundTableDataTemp.seats).filter(
-      ele => roundTableDataTemp.seats[ele].userId,
+      (ele) => roundTableDataTemp.seats[ele].userId,
     ).length;
 
-    logger.info(
-      tableId,
+    logger.info(tableId,
       'initializeGameplayForFirstRound : total Player in table --- ',
       currentPlayersInTable,
     );
 
     if (currentPlayersInTable === Number(roundTableData.noOfPlayer)) {
+
       const playingUsers = roundTableData.seats;
 
       roundTableData.tableState = TABLE_STATE.LOCK_IN_PERIOD;
@@ -99,8 +98,7 @@ async function initializeGameplayForFirstRound(data: initializeGameplayIf) {
       /**
        * scheduling 4 sec timer // locking period
        */
-      logger.debug(
-        tableId,
+      logger.debug(tableId,
         'initializeGameplayForFirstRound : scheduled round timer :: ',
         {
           timer: (NUMERICAL.FOUR + NUMERICAL.ONE) * NUMERICAL.THOUSAND, // in milliseconds
@@ -111,25 +109,20 @@ async function initializeGameplayForFirstRound(data: initializeGameplayIf) {
         },
       );
       if (!tableData.isFTUE) {
+       
+
         const userIds: string[] = _.compact(_.pluck(playingUsers, 'userId'));
         logger.info(tableId, 'userIds :==>> ', userIds);
 
         //New low for Debit all users entry fees
-        const isEntryFeeDeductManage = await entryFeeDeductManage(
-          tableId,
-          roundTableData.currentRound,
-          userIds,
-        );
-        logger.info(
-          tableId,
-          'isEntryFeeDeductManage :>> ',
-          isEntryFeeDeductManage,
-        );
+        let isEntryFeeDeductManage = await entryFeeDeductManage(tableId, roundTableData.currentRound, userIds);
+        logger.info(tableId, 'isEntryFeeDeductManage :>> ', isEntryFeeDeductManage);
 
-        if (isEntryFeeDeductManage) {
+        if(isEntryFeeDeductManage){
+
           // // Add tracked lobby in mongoDB
           // await addLobbyTracking(userIds[0], tableId);
-
+  
           await Scheduler.addJob.roundStartTimer({
             timer: (NUMERICAL.FOUR + NUMERICAL.ONE) * NUMERICAL.THOUSAND, // in milliseconds
             jobId: tableId,
@@ -137,6 +130,7 @@ async function initializeGameplayForFirstRound(data: initializeGameplayIf) {
             roundTableData,
             tableData,
           });
+
         }
 
         //OLD flow for Debit all users entry fees
@@ -153,6 +147,7 @@ async function initializeGameplayForFirstRound(data: initializeGameplayIf) {
         //   logger.info("debitAmountDetail  :: >>", debitAmountDetail);
 
         // }
+
       } else {
         await Scheduler.addJob.roundStartTimer({
           timer: NUMERICAL.ONE * NUMERICAL.THOUSAND, // in milliseconds
@@ -163,14 +158,12 @@ async function initializeGameplayForFirstRound(data: initializeGameplayIf) {
         });
       }
     } else {
-      logger.error(
-        tableId,
+      logger.error(tableId,
         "initializeGameplayForFirstRound : initializeGame table can't start : wait for user",
       );
     }
   } catch (error) {
-    logger.error(
-      tableId,
+    logger.error(tableId,
       `CATCH_ERROR : initializeGameplayForFirstRound :: tableId: ${tableId} :: lobbyId: ${lobbyId} :: gameId: ${gameId} :: roundId: ${roundTableData._id} :: `,
       error,
     );
@@ -182,7 +175,7 @@ async function initializeGameplayForFirstRound(data: initializeGameplayIf) {
     } else if (error instanceof Errors.createCardGameTableError) {
       // totalPlayers.forEach((element: any) => {
       //   UserProfile.deleteDisconnect(element._id);
-      const nonProdMsg = 'Insufficient Balance!';
+      let nonProdMsg = "Insufficient Balance!";
       CommonEventEmitter.emit(EVENTS.SHOW_POPUP, {
         tableId,
         data: {
@@ -195,11 +188,7 @@ async function initializeGameplayForFirstRound(data: initializeGameplayIf) {
           button_methods: [MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.EXIT],
         },
       });
-      await removeAllPlayingTableAndHistory(
-        tableData,
-        roundTableData,
-        roundTableData.currentRound,
-      );
+      await removeAllPlayingTableAndHistory(tableData, roundTableData, roundTableData.currentRound);
       // removeRedisData(
       //   tableId,
       //   {

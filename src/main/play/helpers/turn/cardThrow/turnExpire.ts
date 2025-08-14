@@ -1,9 +1,10 @@
+/* eslint-disable prefer-destructuring */
 export = cardThrowTurnExpire;
 import logger from '../../../../logger';
 import CommonEventEmitter from '../../../../commonEventEmitter';
 import Scheduler from '../../../../scheduler';
-import {getConfig} from '../../../../../config';
-const {TIME_OUT_COUNT} = getConfig();
+import { getConfig } from '../../../../../config';
+const { TIME_OUT_COUNT } = getConfig();
 import {
   getPlayerGamePlay,
   setPlayerGamePlay,
@@ -19,29 +20,26 @@ import {
   HISTORY,
 } from '../../../../../constants';
 import changeThrowCardTurn from '../changeThrowCardTurn';
-import {playerPlayingDataIf} from '../../../../interface/playerPlayingTableIf';
-import {playingTableIf} from '../../../../interface/playingTableIf';
-import {roundTableIf} from '../../../../interface/roundTableIf';
+import { playerPlayingDataIf } from '../../../../interface/playerPlayingTableIf';
+import { playingTableIf } from '../../../../interface/playingTableIf';
+import { roundTableIf } from '../../../../interface/roundTableIf';
 import cancelBattle from '../../../cancelBattle';
 import Errors from '../../../../errors';
-import {updateTurnHistory} from '../../../history';
-import {formatUserThrowCardShow} from '../../playHelper';
-import {userThrowCardTips} from '../../../../FTUE/common';
-import {getCardNumber} from './utile';
+import { updateTurnHistory } from '../../../history';
+import { formatUserThrowCardShow } from '../../playHelper';
+import { userThrowCardTips } from '../../../../FTUE/common';
+import { getCardNumber } from './utile';
 
 // mange Player is not tack a turn (Auto Turn)
 async function cardThrowTurnExpire(
   playerGamePlay: playerPlayingDataIf,
   tableData: playingTableIf,
-  isAutoMode: boolean = false,
+  isAutoMode:boolean = false
 ) {
-  const {userId} = playerGamePlay;
-  const {_id: tableId, currentRound, isFTUE} = tableData;
-  const {getLock} = global;
-  const cardThrowTurnExpireLock = await getLock.acquire(
-    [`cardThrowTurn:${tableId}`],
-    2000,
-  );
+  const { userId } = playerGamePlay;
+  const { _id: tableId, currentRound, isFTUE } = tableData;
+  const { getLock } = global;
+  let cardThrowTurnExpireLock = await getLock.acquire([`cardThrowTurn:${tableId}`], 2000);
   try {
     logger.info(
       `cardThrowTurnExpire : tableId :: ${tableId} :: userId: ${userId} :: isAutoMode ::  ${isAutoMode}`,
@@ -78,7 +76,7 @@ async function cardThrowTurnExpire(
     ) {
       const userScoket = {
         id: playerObj.socketId,
-        eventMetaData: {userId: userId},
+        eventMetaData: { userId: userId },
       };
       const flag = PLAYER_STATE.TIMEOUT;
       // Player miss number of turn then defind in Auto Turn
@@ -111,7 +109,7 @@ async function cardThrowTurnExpire(
 
       let indexSequence = -1;
       if (isFTUE && roundObj.turnCount <= NUMERICAL.TWELVE) {
-        const {throwCardIndex} = await userThrowCardTips(
+        const { throwCardIndex } = await userThrowCardTips(
           userCards,
           roundObj.turnCount,
         );
@@ -210,7 +208,7 @@ async function cardThrowTurnExpire(
               }
               return '';
             })
-            .filter(e => e);
+            .filter((e) => e);
 
           const getSpadesCard: string[] = userCards
             .map((fcard: string) => {
@@ -309,12 +307,7 @@ async function cardThrowTurnExpire(
         setPlayerGamePlay(userId, tableId, playerObj),
         setRoundTableData(tableId, currentRound, roundObj),
       ]);
-      logger.info(
-        `playerObj.isAuto : `,
-        playerObj.isAuto,
-        `playerObj.turnTimeout :`,
-        playerObj.turnTimeout,
-      );
+      logger.info(`playerObj.isAuto : `, playerObj.isAuto ,`playerObj.turnTimeout :`, playerObj.turnTimeout)
       let turnTimeout: boolean = true;
       if (
         isFTUE ||
@@ -335,7 +328,7 @@ async function cardThrowTurnExpire(
         tableId: tableId.toString(),
         data: eventData,
       });
-
+      
       changeThrowCardTurn(tableId.toString());
     }
   } catch (e) {
@@ -352,7 +345,7 @@ async function cardThrowTurnExpire(
     }
   } finally {
     logger.info('cardThrowTurnExpire : Lock : ', tableId);
-    if (cardThrowTurnExpireLock) {
+    if(cardThrowTurnExpireLock){
       await getLock.release(cardThrowTurnExpireLock);
     }
   }

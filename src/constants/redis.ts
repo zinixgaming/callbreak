@@ -19,11 +19,11 @@ const exportObject = {
     REJOIN_HISTORY: 'rejoin_history',
     USER: 'user',
     LOBBY_DETAIL: 'lobbyDetail',
-    ONLINE_USER_COUNTER: 'online_player',
+    ONLINE_USER_COUNTER: 'online_player'
   },
-  ONLINEPLAYER: 'activePlayer',
-  ONLINE_PLAYER_LOBBY: 'activePlayerInLobby',
-  TRACKEDLOBBY: 'trackedLobby',
+  ONLINEPLAYER : 'activePlayer',
+  ONLINE_PLAYER_LOBBY  : 'activePlayerInLobby',
+  TRACKEDLOBBY : "trackedLobby"
 };
 
 export = exportObject;

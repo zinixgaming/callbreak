@@ -6,36 +6,36 @@ import {
   getPlayerGamePlay,
 } from '../../../gameTable/utils';
 import CommonEventEmitter from '../../../commonEventEmitter';
-import {EVENTS, MESSAGES, NUMERICAL, TABLE_STATE} from '../../../../constants';
-import {showUserScoreIf, userScoreIf} from '../../../interface/userScoreIf';
-import {playingTableIf} from '../../../interface/playingTableIf';
-import {roundTableIf} from '../../../interface/roundTableIf';
+import { EVENTS, MESSAGES, NUMERICAL, TABLE_STATE } from '../../../../constants';
+import { showUserScoreIf, userScoreIf } from '../../../interface/userScoreIf';
+import { playingTableIf } from '../../../interface/playingTableIf';
+import { roundTableIf } from '../../../interface/roundTableIf';
 import socketAck from '../../../../socketAck';
 import cancelBattle from '../../cancelBattle';
 import Errors from '../../../errors';
 import Validator from '../../../Validator';
-import {formatScoreData} from '../playHelper';
-import {formatWinnerDeclareIf} from '../../../interface/responseIf';
+import { formatScoreData } from '../playHelper';
+import { formatWinnerDeclareIf } from '../../../interface/responseIf';
 
 //User Show Score Board in running Game
 const showScoreBoard = async (
   data: showUserScoreIf,
   socket: any,
-  ack?: (response: any) => void,
+  ack?: Function,
 ) => {
-  const {tableId} = data;
+  const { tableId } = data;
   try {
     const playingTable: playingTableIf = await getTableData(tableId);
-    const {currentRound} = playingTable;
+    const { currentRound } = playingTable;
     const roundPlayingTable: roundTableIf = await getRoundTableData(
       tableId,
       currentRound,
     );
     const playerSeats = roundPlayingTable.seats;
 
-    const {isTieRound, currentTieRound} = roundPlayingTable;
+    const { isTieRound, currentTieRound } = roundPlayingTable;
     const playersPlayingData = await Promise.all(
-      Object.keys(playerSeats).map(async ele =>
+      Object.keys(playerSeats).map(async (ele) =>
         getPlayerGamePlay(playerSeats[ele].userId, tableId),
       ),
     );
@@ -43,7 +43,7 @@ const showScoreBoard = async (
     let isUserLeft: boolean = false;
     let isUserLeftCount: number = 0;
     // set Default Data Of Currant Round Score
-    playersPlayingData.forEach(async player => {
+    playersPlayingData.forEach(async (player) => {
       const score: any = {};
       if (player != null) {
         const bid = player.bid;
@@ -86,6 +86,7 @@ const showScoreBoard = async (
     if (scoureHistory != null) scoureHistory = scoureHistory.history;
     logger.info(tableId, 'scoreHistory :: ', scoureHistory);
     if (scoureHistory === null) {
+
       //send SHOW_SCORE_BOARD event in socket
       CommonEventEmitter.emit(EVENTS.SHOW_POPUP, {
         socket,
@@ -95,7 +96,9 @@ const showScoreBoard = async (
           message: MESSAGES.ERROR.SCORE_BOARD_NOT_FOUND,
         },
       });
+
     } else {
+
       // scoureHistory.push(addCurrantScour);
       const roundScore = await formatScoreData(userScore, scoureHistory);
 
@@ -104,7 +107,7 @@ const showScoreBoard = async (
         winner: [],
         roundScoreHistory: roundScore,
         roundTableId: tableId,
-        nextRound: roundPlayingTable.currentRound,
+        nextRound : roundPlayingTable.currentRound
       };
 
       sendEventData =
@@ -119,6 +122,7 @@ const showScoreBoard = async (
         socket,
         data: sendEventData,
       });
+
     }
 
     if (ack) {
@@ -136,8 +140,7 @@ const showScoreBoard = async (
       );
     }
   } catch (error: any) {
-    logger.error(
-      tableId,
+    logger.error(tableId, 
       `CATCH_ERROR : showScoreBoard :userId: ${socket.userId} :: tableId: ${tableId} Error :: `,
       error,
     );

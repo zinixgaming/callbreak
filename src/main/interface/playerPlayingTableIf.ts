@@ -14,7 +14,7 @@ export interface defaultPlayerTableIf {
   socketId: string;
   roundTableId: string;
   seatIndex: number;
-  isBot: boolean;
+  isBot : boolean;
 }
 
 export interface playerPlayingDataIf {
@@ -38,8 +38,8 @@ export interface playerPlayingDataIf {
   isLeft: boolean;
   isAuto: boolean;
   isTurn: boolean;
-  isBot: boolean;
+  isBot : boolean;
   createdAt: Date;
   updatedAt: Date;
-  roundCards: Array<any>;
+  roundCards : Array<any>;
 }

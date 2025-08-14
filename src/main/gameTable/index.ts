@@ -1,5 +1,8 @@
-import logger from '../logger';
-import CommonEventEmitter from '../commonEventEmitter';
+/* eslint-disable no-param-reassign */
+/* eslint-disable node/no-unsupported-features/es-syntax */
+import logger from "../logger";
+import CommonEventEmitter from "../commonEventEmitter";
+import DefaultDataGenerator from "../defaultData";
 import {
   NUMERICAL,
   EVENTS,
@@ -7,8 +10,8 @@ import {
   GAME_TYPE,
   MESSAGES,
   REDIS,
-} from '../../constants';
-import Scheduler from '../scheduler';
+} from "../../constants";
+import Scheduler from "../scheduler";
 import {
   setTableData,
   setRoundTableData,
@@ -25,42 +28,38 @@ import {
   getUser,
   setUser,
   remTableFromQueue,
-} from './utils';
-import rejoinTable from '../play/rejoinTable/rejoinTable';
+} from "./utils";
+import rejoinTable from "../play/rejoinTable/rejoinTable";
 import {
   formatGameTableInfo,
   formatJoinTableInfo,
   formatSingUpInfo,
-} from '../play/helpers/playHelper';
-import {blockUserCheckI, userIf} from '../interface/userSignUpIf';
-import {defaultPlayingTableIf} from '../interface/playingTableIf';
-import {playerPlayingDataIf} from '../interface/playerPlayingTableIf';
-import socketAck from '../../socketAck';
-import Validator from '../Validator';
-import Errors from '../errors';
-import {setupRoundIf} from '../interface/startRoundIf';
-import cancelBattle from '../play/cancelBattle';
+} from "../play/helpers/playHelper";
+import { blockUserCheckI, userIf } from "../interface/userSignUpIf";
+import { defaultPlayingTableIf } from "../interface/playingTableIf";
+import { playerPlayingDataIf } from "../interface/playerPlayingTableIf";
+import socketAck from "../../socketAck";
+import Validator from "../Validator";
+import Errors from "../errors";
+import { setupRoundIf } from "../interface/startRoundIf";
+import cancelBattle from "../play/cancelBattle";
 // import { signUpForBot } from "../FTUE";
-import redis from '../redis';
-import locationDistanceCheck from '../locationCheack/locationCheack';
-import {
-  createTable,
-  findAvaiableTable,
-  insertPlayerInTable,
-  setupRound,
-} from './comman';
-import {addGameRunningStatus, rediusCheck} from '../clientsideapi';
-import {rediusCheckDataRes} from '../interface/cmgApiIf';
-import {blockUserCheck} from '../blockUserCheck';
+import redis from "../redis"
+import locationDistanceCheck from "../locationCheack/locationCheack";
+import { createTable, findAvaiableTable, insertPlayerInTable, setupRound } from "./comman";
+import { addGameRunningStatus, rediusCheck } from "../clientsideapi";
+import { rediusCheckDataRes } from "../interface/cmgApiIf";
+import { blockUserCheck } from "../blockUserCheck";
+
 
 // for insert new signed up player in table
 const insertNewPlayer = async (
   userData: userIf,
   socket: any,
-  ack?: (response: any) => void,
+  ack?: Function
 ) => {
   const socketId = socket.id;
-  const {getLock, getConfigData: config} = global;
+  const { getLock, getConfigData: config } = global;
   const {
     gameId,
     lobbyId,
@@ -72,7 +71,7 @@ const insertNewPlayer = async (
     isFTUE,
     winningAmount,
     noOfPlayer,
-    isUseBot,
+    isUseBot
   } = userData;
   const gameType = GAME_TYPE.SOLO;
   const queueKey = `${gameType}:${lobbyId}`;
@@ -84,16 +83,16 @@ const insertNewPlayer = async (
       userData,
       true,
       socket,
-      ack,
+      ack
     );
     logger.info(userId, `createOrJoinTable :::>> `, createOrJoinTable);
     if (createOrJoinTable) {
       let tableId = await findAvaiableTable(queueKey);
-      logger.info(userId, 'insertNewPlayer ::: before tableId ::: ', tableId);
+      logger.info(userId, "insertNewPlayer ::: before tableId ::: ", tableId);
       if (!ack) {
         tableId = socket.tableId;
       }
-      logger.info(userId, 'insertNewPlayer ::: after tableId ::: ', tableId);
+      logger.info(userId, "insertNewPlayer ::: after tableId ::: ", tableId);
       if (!tableId) {
         // create new table
         tableId = await createTable({
@@ -109,68 +108,48 @@ const insertNewPlayer = async (
           isFTUE,
           totalRounds: userData.totalRound,
           winningAmount,
-          isUseBot,
+          isUseBot
         });
 
-        await setupRound({tableId, noOfPlayer, roundNo: NUMERICAL.ONE});
-      } else {
+        await setupRound({ tableId, noOfPlayer, roundNo: NUMERICAL.ONE });
+      }
+      else {
+
         // blocking user check
-        const blockUserData = (await blockUserCheck(
-          tableId,
-          userData,
-          queueKey,
-        )) as blockUserCheckI;
+        let blockUserData = await blockUserCheck(tableId, userData, queueKey) as blockUserCheckI;
         if (!blockUserData) throw new Error(`Could not block user`);
 
         logger.info(userId, `blockUserData :: >>`, blockUserData);
         tableId = blockUserData.tableId;
 
         if (!blockUserData.isNewTableCreated) {
+
           //redius check
-          const rediusCheckData: rediusCheckDataRes = await rediusCheck(
-            gameId,
-            userData.authToken,
-            socketId,
-            tableId,
-          );
-          logger.info('userData.isUseBot  ==>>>', userData.isUseBot);
+          const rediusCheckData: rediusCheckDataRes = await rediusCheck(gameId, userData.authToken, socketId, tableId);
+          logger.info("userData.isUseBot  ==>>>", userData.isUseBot)
           if (rediusCheckData) {
-            const rangeRediusCheck: number = parseFloat(
-              rediusCheckData.LocationRange,
-            );
-            if (
-              rediusCheckData &&
-              rediusCheckData.isGameRadiusLocationOn &&
-              rangeRediusCheck != NUMERICAL.ZERO &&
-              userData.isUseBot == false
-            ) {
-              logger.info(
-                'locationDistanceCheck ===>> before',
-                tableId,
-                rangeRediusCheck,
-              );
-              tableId = await locationDistanceCheck(
-                tableId,
-                userData,
-                queueKey,
-                rangeRediusCheck,
-              );
+
+            let rangeRediusCheck: number = parseFloat(rediusCheckData.LocationRange);
+            if (rediusCheckData && rediusCheckData.isGameRadiusLocationOn && rangeRediusCheck != NUMERICAL.ZERO && userData.isUseBot == false) {
+
+              logger.info("locationDistanceCheck ===>> before", tableId, rangeRediusCheck);
+              tableId = await locationDistanceCheck(tableId, userData, queueKey, rangeRediusCheck);
             }
           }
         }
+
       }
-      logger.info(userId, 'tableId  ===>>> ', tableId);
+      logger.info(userId, "tableId  ===>>> ", tableId);
 
       // inserting player in table
       const seatIndex: number | null = await insertPlayerInTable(
         userData,
-        tableId,
+        tableId
       );
-      logger.info(
-        userId,
-        'insertNewPlayer : seatIndex -- ',
+      logger.info(userId,
+        "insertNewPlayer : seatIndex -- ",
         seatIndex,
-        `tableId: ${tableId} :: userId:${userId}`,
+        `tableId: ${tableId} :: userId:${userId}`
       );
 
       // get updated table value
@@ -185,23 +164,18 @@ const insertNewPlayer = async (
           roundTableData,
           {
             seatIndex,
-          },
+          }
         );
 
-        const getOnlinePlayerCountLobbyWise = await getOnliPlayerCountLobbyWise(
-          REDIS.ONLINE_PLAYER_LOBBY,
-          lobbyId,
-        );
+        let getOnlinePlayerCountLobbyWise = await getOnliPlayerCountLobbyWise(REDIS.ONLINE_PLAYER_LOBBY, lobbyId);
 
         if (!getOnlinePlayerCountLobbyWise) {
           await setCounterIntialValueLobby(REDIS.ONLINE_PLAYER_LOBBY, lobbyId);
         }
-        // for lobby wise online users
-        const countLobbyWise = await incrCounterLobbyWise(
-          REDIS.ONLINE_PLAYER_LOBBY,
-          lobbyId,
-        );
+        // for lobby wise online users 
+        let countLobbyWise = await incrCounterLobbyWise(REDIS.ONLINE_PLAYER_LOBBY, lobbyId)
         logger.info(userId, 'insertNewPlayer :count :: ', countLobbyWise);
+
 
         // send (signUp And Get Table Info)both event data in signUp
         socketAck.ackMid(
@@ -213,12 +187,12 @@ const insertNewPlayer = async (
           // socket.metrics,
           socket.userId,
           tableId,
-          ack,
+          ack
         );
       }
       const eventJoinTableData = await formatJoinTableInfo(
         seatIndex,
-        roundTableData,
+        roundTableData
       );
       // const playerGamePlay = await getPlayerGamePlay(userData.userId, tableId);
 
@@ -231,7 +205,7 @@ const insertNewPlayer = async (
       // join socket in socket room
       CommonEventEmitter.emit(EVENTS.ADD_PLAYER_IN_TABLE_ROOM, {
         socket,
-        data: {tableId},
+        data: { tableId },
       });
 
       socket.eventMetaData = {
@@ -246,14 +220,9 @@ const insertNewPlayer = async (
       const apiData = {
         tableId,
         tournamentId: userProfile.lobbyId,
-        gameId: userProfile.gameId,
-      };
-      const addGameRunningDetail = await addGameRunningStatus(
-        apiData,
-        userProfile.authToken,
-        userProfile.socketId,
-        userProfile.userId,
-      );
+        gameId: userProfile.gameId
+      }
+      const addGameRunningDetail = await addGameRunningStatus(apiData, userProfile.authToken, userProfile.socketId, userProfile.userId);
 
       userProfile.tableId = tableId;
       await setUser(userId, userProfile);
@@ -267,17 +236,16 @@ const insertNewPlayer = async (
             userId: roundTableData.seats[`s${seatIndex}`].userId,
             tableId,
             isEndGame: false,
-          },
+          }
         );
       }
       if (Number(roundTableData.noOfPlayer) > NUMERICAL.ONE) {
         if (roundTableData.totalPlayers !== Number(roundTableData.noOfPlayer)) {
           // push table in the Queue if FTUE is true to add bot
-          logger.info(
-            userId,
-            'insertNewPlayer : pushTableInQueue :: tableId :: ',
+          logger.info(userId,
+            "insertNewPlayer : pushTableInQueue :: tableId :: ",
             tableId,
-            isFTUE,
+            isFTUE
           );
 
           if (roundTableData.totalPlayers == NUMERICAL.ONE) {
@@ -294,18 +262,17 @@ const insertNewPlayer = async (
               gameStartTimer: userData.gameStartTimer,
               userTurnTimer: userData.userTurnTimer,
               entryFee: userData.entryFee,
-              totalRound: userData.totalRound,
-              minPlayer: userData.minPlayer,
+              totalRound : userData.totalRound,
+              minPlayer : userData.minPlayer ,
               noOfPlayer,
               winningAmount,
               isUseBot,
-              userAuthToken: userData.authToken,
-              moneyMode: userData.moneyMode,
+              userAuthToken : userData.authToken,
+              moneyMode : userData.moneyMode
             },
           });
-        } else if (
-          roundTableData.totalPlayers === Number(roundTableData.noOfPlayer)
-        ) {
+
+        } else if (roundTableData.totalPlayers === Number(roundTableData.noOfPlayer)) {
           // table is full
           const data = {
             timer: tableData.gameStartTimer,
@@ -316,11 +283,10 @@ const insertNewPlayer = async (
               tableId,
               data,
             });
-            logger.info(
-              userId,
-              'insertNewPlayer : gameStartTimer :::: ',
+            logger.info(userId,
+              "insertNewPlayer : gameStartTimer :::: ",
               tableData.gameStartTimer,
-              `tableId: ${tableId} :: userId:${userId}`,
+              `tableId: ${tableId} :: userId:${userId}`
             );
             await Scheduler.addJob.initializeGameplay({
               timer:
@@ -351,36 +317,31 @@ const insertNewPlayer = async (
 
           await setRoundTableData(tableId, NUMERICAL.ONE, roundTableData);
         }
-      } else {
-        throw new Errors.InvalidInput(
-          'number of player require more then one!',
-        );
+      }
+      else {
+        throw new Errors.InvalidInput("number of player require more then one!")
       }
     } else {
-      logger.info(
-        userId,
-        'insertNewPlayer : rejoinTableOnKillApp :: get false :',
-      );
+      logger.info(userId, "insertNewPlayer : rejoinTableOnKillApp :: get false :");
       // await getLock.release(findTableLock);
     }
   } catch (error) {
-    logger.error(
-      userId,
-      'CATCH_ERROR : insertNewPlayer :: ',
+    logger.error(userId,
+      "CATCH_ERROR : insertNewPlayer :: ",
       userId,
       _id,
       queueKey,
-      error,
+      error
     );
 
     if (error instanceof Errors.CancelBattle) {
       await cancelBattle({
-        // @ts-expect-error - tableId is used in cancelBattle function
+        // @ts-ignore
         tableId,
         errorMessage: error,
       });
     } else if (error instanceof Errors.InsufficientFundError) {
-      const nonProdMsg = 'Insufficient Balance!';
+      let nonProdMsg = "Insufficient Balance!";
       CommonEventEmitter.emit(EVENTS.SHOW_POPUP, {
         socket,
         data: {
@@ -407,7 +368,7 @@ const insertNewPlayer = async (
         // socket.metrics,
         socket.userId,
         _id,
-        ack,
+        ack
       );
     }
   } finally {

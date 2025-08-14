@@ -1,9 +1,9 @@
-import {CARD_SEQUENCE, TABLE_STATE} from '../../../constants';
+import { CARD_SEQUENCE, TABLE_STATE } from '../../../constants';
 import Scheduler from '../../scheduler';
-import {getPlayerGamePlay, getRoundTableData} from '../../gameTable/utils';
-import {playerPlayingDataIf} from '../../interface/playerPlayingTableIf';
-import {playingTableIf} from '../../interface/playingTableIf';
-import {roundTableIf} from '../../interface/roundTableIf';
+import { getPlayerGamePlay, getRoundTableData } from '../../gameTable/utils';
+import { playerPlayingDataIf } from '../../interface/playerPlayingTableIf';
+import { playingTableIf } from '../../interface/playingTableIf';
+import { roundTableIf } from '../../interface/roundTableIf';
 import logger from '../../logger';
 import firstTurn from './firstTurn';
 import secondTurn from './secondTurn';
@@ -13,9 +13,9 @@ async function botCardThrow(
   playerGamePlay: playerPlayingDataIf,
   tableData: playingTableIf,
 ) {
-  const {userId, currentCards} = playerGamePlay;
-  const {_id: tableId, currentRound} = tableData;
-  const {getLock, getConfigData: config} = global;
+  const { userId, currentCards } = playerGamePlay;
+  const { _id: tableId, currentRound } = tableData;
+  const { getLock, getConfigData: config } = global;
   const botCardThrowTurnLock = await getLock.acquire([tableId], 2000);
   try {
     logger.info(`botCardThrow : tableId :: ${tableId} :: userId: ${userId}`);
@@ -35,7 +35,7 @@ async function botCardThrow(
       throw new Error('current turn is not your turn !');
 
     const userCards = [...playerObj.currentCards];
-    const cardSequence = roundObj.turnCardSequence;
+    let cardSequence = roundObj.turnCardSequence;
     const roundCurrentCards = [...roundObj.turnCurrentCards];
 
     let indexSequence = -1;
@@ -62,7 +62,7 @@ async function botCardThrow(
     if (cardIndex === -1)
       throw new Error('botCardThrow : current card is not your !');
     logger.info('botCardThrow :: call :: cardThrow.');
-    cardThrow({card}, {eventMetaData: {userId, tableId}});
+    cardThrow({ card }, { eventMetaData: { userId, tableId } });
   } catch (e) {
     logger.error(
       `CATCH_ERROR : botCardThrow tableId :: ${tableId} :: userId: ${userId} :: `,

@@ -23,17 +23,17 @@ import {
   REDIS,
 } from '../../../constants';
 import CommonEventEmitter from '../../commonEventEmitter';
-import {EVENTS, MESSAGES} from '../../../constants';
+import { EVENTS, MESSAGES } from '../../../constants';
 import leaveTableHelper from './helpers';
 import setBidOnTurnExpire from '../helpers/turn/bidTurn/bidTurnExpire';
 import cardThrowTurnExpire from '../helpers/turn/cardThrow/turnExpire';
-import {playerPlayingDataIf} from '../../interface/playerPlayingTableIf';
-import {playingTableIf} from '../../interface/playingTableIf';
-import {roundTableIf} from '../../interface/roundTableIf';
-import {throwErrorIF} from '../../interface/throwError';
+import { playerPlayingDataIf } from '../../interface/playerPlayingTableIf';
+import { playingTableIf } from '../../interface/playingTableIf';
+import { roundTableIf } from '../../interface/roundTableIf';
+import { throwErrorIF } from '../../interface/throwError';
 import socketAck from '../../../socketAck';
-import {markCompletedGameStatus} from '../../clientsideapi';
-import {userIf} from '../../interface/userSignUpIf';
+import { markCompletedGameStatus } from '../../clientsideapi';
+import { userIf } from '../../interface/userSignUpIf';
 
 /*
   Manage User Leave Table
@@ -43,34 +43,20 @@ async function leaveTable(
   tableId: string,
   flag: string,
   socket: any,
-  ack?: (response: any) => void,
+  ack?: Function,
   isDeductedEntryFee = true,
   isLeaveFromScoreBoard: boolean = false,
   // isAlreadyPlay = false
 ): Promise<any> {
   const socketId = socket.id;
-  const {getLock} = global;
-  logger.info(
-    tableId,
-    'leaveTable :: tableId : ' + tableId + ' :: flag : ' + flag,
-    ' :: socket.eventMetaData : ' + JSON.stringify(socket.eventMetaData),
-  );
-  logger.info(
-    tableId,
-    'leaveTable :: tableId : ' + tableId,
-    'isDeductedEntryFee ::>> ',
-    isDeductedEntryFee,
-    'isLeaveFromScoreBoard ::>> ',
-    isLeaveFromScoreBoard,
-  );
-  const {userId, userObjectId} = socket.eventMetaData;
+  const { getLock } = global;
+  logger.info(tableId, 'leaveTable :: tableId : ' + tableId + ' :: flag : ' + flag, ' :: socket.eventMetaData : ' + JSON.stringify(socket.eventMetaData));
+  logger.info(tableId, 'leaveTable :: tableId : ' + tableId, "isDeductedEntryFee ::>> ", isDeductedEntryFee, "isLeaveFromScoreBoard ::>> ", isLeaveFromScoreBoard);
+  const { userId, userObjectId } = socket.eventMetaData;
 
   const key = `${GAME_TYPE.SOLO}:${tableId}`;
 
-  logger.info(
-    tableId,
-    `leaveTable :: userId : ${userId} :: user : ${userObjectId}`,
-  );
+  logger.info(tableId, `leaveTable :: userId : ${userId} :: user : ${userObjectId}`);
 
   // set lock;
   const leaveTableLock = await getLock.acquire([key], 2000);
@@ -96,14 +82,13 @@ async function leaveTable(
       };
       throw errorObj;
     }
-    const {currentRound} = playingTable;
+    const { currentRound } = playingTable;
     const roundPlayingTable: roundTableIf = await getRoundTableData(
       tableId,
       currentRound,
     );
 
-    logger.info(
-      tableId,
+    logger.info(tableId,
       `leaveTable :: roundPlayingTable ::: ${roundPlayingTable}  roundPlayingTable.tableState : ${roundPlayingTable.tableState}`,
     );
     if (typeof userId === 'undefined' || userId === '' || userId === null) {
@@ -128,27 +113,23 @@ async function leaveTable(
       throw errorObj;
     }
 
-    if (
-      !isLeaveFromScoreBoard &&
-      roundPlayingTable.tableState === TABLE_STATE.SCOREBOARD_DECLARED &&
-      playingTable.winner.length === NUMERICAL.ONE
-    ) {
+    if (!isLeaveFromScoreBoard && roundPlayingTable.tableState === TABLE_STATE.SCOREBOARD_DECLARED && playingTable.winner.length === NUMERICAL.ONE) {
       return false;
     }
     if (roundPlayingTable.tableState === TABLE_STATE.WAITING_FOR_PLAYERS) {
-      logger.info(tableId, ' WAITING_FOR_PLAYERS :: flag ::: >> ', flag);
+
+      logger.info(tableId, " WAITING_FOR_PLAYERS :: flag ::: >> ", flag);
       playerLeave = true;
 
       const userDetail: userIf = await getUser(userId);
-      await markCompletedGameStatus(
-        {
-          tableId,
-          gameId: userDetail.gameId,
-          tournamentId: userDetail.lobbyId,
-        },
+      await markCompletedGameStatus({
+        tableId,
+        gameId: userDetail.gameId,
+        tournamentId: userDetail.lobbyId
+      },
         userDetail.authToken,
-        socketId,
-      );
+        socketId
+      )
 
       // const decrCounter = await decrCounterLobbyWise(REDIS.ONLINE_PLAYER_LOBBY, playingTable.lobbyId);
       // logger.info("WAITING_FOR_PLAYERS :: decrCounter ::>> ", decrCounter);
@@ -170,9 +151,9 @@ async function leaveTable(
         playerPlayingData,
         roundPlayingTable,
         playingTable,
-        isDeductedEntryFee,
+        isDeductedEntryFee
       );
-      logger.info(tableId, 'leaveStatus :>>', leaveStatus);
+      logger.info(tableId, "leaveStatus :>>", leaveStatus)
       if (leaveStatus) {
         CommonEventEmitter.emit(EVENTS.SHOW_POPUP, {
           socket,
@@ -199,6 +180,7 @@ async function leaveTable(
     }
     // turn start and user leave a table
     if (roundPlayingTable.currentTurn === userId) {
+
       // if (roundPlayingTable.tableState === TABLE_STATE.BID_ROUND_STARTED) {
       //   await Scheduler.cancelJob.playerBidTurnTimerCancel(
       //     `${userId}:${tableId}:${currentRound}`,
@@ -209,14 +191,13 @@ async function leaveTable(
       //   );
 
       //   setBidOnTurnExpire(playerPlayingData, playingTable);
-      // }
-
+      // } 
+      
       if (roundPlayingTable.tableState === TABLE_STATE.ROUND_STARTED) {
         await Scheduler.cancelJob.playerTurnTimerCancel(
           `${userId}:${tableId}:${currentRound}`,
         );
-        logger.info(
-          tableId,
+        logger.info(tableId,
           'leaveTable : cardThrowTurnExpire : typeof :: ',
           typeof cardThrowTurnExpire,
         );
@@ -260,32 +241,29 @@ async function leaveTable(
         },
       });
     } else {
-      const decrCounter = await decrCounterLobbyWise(
-        REDIS.ONLINE_PLAYER_LOBBY,
-        playingTable.lobbyId,
-      );
-      logger.info('flag :: LEFT :: decrCounter ::>> ', decrCounter);
+
+      const decrCounter = await decrCounterLobbyWise(REDIS.ONLINE_PLAYER_LOBBY, playingTable.lobbyId);
+      logger.info("flag :: LEFT :: decrCounter ::>> ", decrCounter);
 
       const userDetail: userIf = await getUser(userId);
       userDetail.tableId = EMPTY;
 
       // user leave api call
-      await markCompletedGameStatus(
-        {
-          tableId,
-          gameId: userDetail.gameId,
-          tournamentId: userDetail.lobbyId,
-        },
+      await markCompletedGameStatus({
+        tableId,
+        gameId: userDetail.gameId,
+        tournamentId: userDetail.lobbyId
+      },
         userDetail.authToken,
-        socketId,
-      );
+        socketId
+      )
       await setUser(userId, userDetail);
       await removeUser(userId);
+
     }
     return true;
   } catch (error: any) {
-    logger.error(
-      tableId,
+    logger.error(tableId,
       `CATCH_ERROR : leaveTable :: tableId: ${tableId} :: userId: ${userId} :: `,
       error,
     );

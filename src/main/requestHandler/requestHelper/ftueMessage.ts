@@ -1,9 +1,9 @@
 import socketAck from '../../../socketAck';
-import {EVENTS, MESSAGES} from '../../../constants';
+import { EVENTS, MESSAGES } from '../../../constants';
 import logger from '../../logger';
 
 function ftueMessage(data: any, socket: any, ack: any) {
-  const {getConfigData: config} = global;
+  const { getConfigData: config } = global;
 
   logger.info('ftueMessage :: MESSAGES.FTUE : ', MESSAGES.FTUE);
   const response = {

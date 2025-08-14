@@ -1,14 +1,14 @@
-import logger from '../../logger';
-import CommonEventEmitter from '../../commonEventEmitter';
+import logger from "../../logger";
+import CommonEventEmitter from "../../commonEventEmitter";
 import {
   getPlayerGamePlay,
   getRejoinTableHistory,
   removeRejoinTableHistory,
-} from '../../gameTable/utils';
-import {EVENTS, MESSAGES, NUMERICAL, PRODUCTION} from '../../../constants';
-import rejoinPlayingTable from './index';
-import {playerPlayingDataIf} from '../../interface/playerPlayingTableIf';
-import socketAck from '../../../socketAck';
+} from "../../gameTable/utils";
+import { EVENTS, MESSAGES, NUMERICAL, PRODUCTION } from "../../../constants";
+import rejoinPlayingTable from "./index";
+import { playerPlayingDataIf } from "../../interface/playerPlayingTableIf";
+import socketAck from "../../../socketAck";
 
 // check Player Back in game from Back_Ground
 const rejoinPlayingTablePopUp = async (
@@ -18,10 +18,10 @@ const rejoinPlayingTablePopUp = async (
   roomFlag: boolean,
   isFTUE: boolean,
   socket: any,
-  ack?: (response: any) => void,
+  ack?: Function
 ) => {
-  const {getLock} = global;
-  let tableId = '';
+  const { getLock } = global;
+  let tableId = "";
   const rejoinPlayingTablePopUpLock = await getLock.acquire([userId], 2000);
   try {
     const {
@@ -33,34 +33,24 @@ const rejoinPlayingTablePopUp = async (
       },
     } = global;
 
-    logger.info(
-      userId,
-      'rejoinPlayingTablePopUp :==>> ',
-      userId,
-      gameId,
-      lobbyId,
-    );
+    logger.info(userId,'rejoinPlayingTablePopUp :==>> ', userId, gameId, lobbyId);
     const rejoinPlayData = await getRejoinTableHistory(userId, gameId, lobbyId);
 
-    logger.info(
-      userId,
-      'rejoinPlayingTablePopUp :: :: rejoinPlayData :: ',
-      rejoinPlayData,
+    logger.info(userId,
+      "rejoinPlayingTablePopUp :: :: rejoinPlayData :: ",
+      rejoinPlayData
     );
 
     // handle re-join for FTUE
     if (isFTUE) {
-      logger.info(
-        userId,
-        'rejoinPlayingTablePopUp : client disconnect on FTUE :-:',
-      );
+      logger.info(userId,"rejoinPlayingTablePopUp : client disconnect on FTUE :-:");
 
       const sendEventData = {
         statusFlag: true,
         message: MESSAGES.ALERT_MESSAGE.REJOIN_POPUP_MESSAGE,
         reason: FTUE_DISCONNECT_POP_REASON
           ? FTUE_DISCONNECT_POP_REASON
-          : 'You have been removed from this table because of your inactivity from a long time. Please exit and join again. Thank you!',
+          : "You have been removed from this table because of your inactivity from a long time. Please exit and join again. Thank you!",
         type: MESSAGES.ALERT_MESSAGE.REJOIN_POPUP_TYPE,
         title: MESSAGES.ALERT_MESSAGE.REJOIN_POPUP_TITLE,
         buttonCount: NUMERICAL.ONE,
@@ -72,10 +62,9 @@ const rejoinPlayingTablePopUp = async (
 
       throw sendEventData;
     } else if (!rejoinPlayData) {
-      logger.info(
-        userId,
-        'rejoinPlayingTablePopUp : send event to client your are alerdy leave this table :-:',
-        'rejoinPlayingTablePopUp : create new table in rejoin.',
+      logger.info(userId,
+        "rejoinPlayingTablePopUp : send event to client your are alerdy leave this table :-:",
+        "rejoinPlayingTablePopUp : create new table in rejoin."
       );
       return true;
       // const sendEventData = {
@@ -105,22 +94,18 @@ const rejoinPlayingTablePopUp = async (
       tableId = rejoinPlayData.tableId;
       const userPlayingTable: playerPlayingDataIf = await getPlayerGamePlay(
         userId,
-        tableId,
+        tableId
       );
-      logger.info(
-        userId,
-        'rejoinPlayingTablePopUp : userPlayingTable :: ',
-        userPlayingTable,
+      logger.info(userId,
+        "rejoinPlayingTablePopUp : userPlayingTable :: ",
+        userPlayingTable
       );
 
       if (!userPlayingTable) {
         const gameEndFlag = rejoinPlayData.isEndGame;
         let sendEventData;
         if (gameEndFlag) {
-          logger.info(
-            userId,
-            'rejoinPlayingTablePopUp : send End Game Message',
-          );
+          logger.info(userId,"rejoinPlayingTablePopUp : send End Game Message");
           // Send End Game Message
           sendEventData = {
             statusFlag: true,
@@ -132,16 +117,13 @@ const rejoinPlayingTablePopUp = async (
             button_text: [
               MESSAGES.ALERT_MESSAGE.BUTTON_TEXT
                 .EXIT /* MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.NO*/,
-              MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.NEW_GAME,
+              MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.NEW_GAME 
             ],
-            button_color: [
-              MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED,
-              MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.GREEN,
-            ],
+            button_color: [MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED, MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.GREEN],
             button_methods: [
               MESSAGES.ALERT_MESSAGE.BUTTON_METHOD
                 .EXIT /* MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.NO*/,
-              MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.YES,
+              MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.YES 
             ],
             showLoader: false,
           };
@@ -151,9 +133,8 @@ const rejoinPlayingTablePopUp = async (
           // });
           // return false;
         } else {
-          logger.info(
-            userId,
-            'rejoinPlayingTablePopUp : create new table in rejoin :-: ',
+          logger.info(userId,
+            "rejoinPlayingTablePopUp : create new table in rejoin :-: "
           );
           sendEventData = {
             statusFlag: true,
@@ -182,9 +163,8 @@ const rejoinPlayingTablePopUp = async (
       } else {
         const gameEndFlag = rejoinPlayData.isEndGame;
         if (userPlayingTable.isLeft) {
-          logger.info(
-            userId,
-            'rejoinPlayingTablePopUp : send event to client your are alerdy leave this table for timeout resoun :: -----',
+          logger.info(userId,
+            "rejoinPlayingTablePopUp : send event to client your are alerdy leave this table for timeout resoun :: -----"
           );
           const sendEventData = {
             statusFlag: true,
@@ -210,10 +190,7 @@ const rejoinPlayingTablePopUp = async (
           // });
           throw sendEventData;
         } else if (gameEndFlag) {
-          logger.info(
-            userId,
-            'rejoinPlayingTablePopUp : send End Game Message.',
-          );
+          logger.info(userId,"rejoinPlayingTablePopUp : send End Game Message.");
           // Send End Game Message
           const sendEventData = {
             statusFlag: true,
@@ -225,16 +202,13 @@ const rejoinPlayingTablePopUp = async (
             button_text: [
               MESSAGES.ALERT_MESSAGE.BUTTON_TEXT
                 .EXIT /* MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.NO*/,
-              MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.NEW_GAME,
+              MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.NEW_GAME 
             ],
-            button_color: [
-              MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED,
-              MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.GREEN,
-            ],
+            button_color: [MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED, MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.GREEN],
             button_methods: [
               MESSAGES.ALERT_MESSAGE.BUTTON_METHOD
                 .EXIT /* MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.NO*/,
-              MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.YES,
+              MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.YES 
             ],
             showLoader: false,
           };
@@ -244,27 +218,23 @@ const rejoinPlayingTablePopUp = async (
           // });
           throw sendEventData;
         } else {
-          logger.info(
-            userId,
-            'rejoinPlayingTablePopUp : rejoin success fulliy ---11-',
-          );
+          logger.info(userId,"rejoinPlayingTablePopUp : rejoin success fulliy ---11-");
           rejoinPlayingTable(
             userId,
             rejoinPlayData.tableId,
             roomFlag,
             socket,
             false,
-            ack,
+            ack
           );
         }
       }
     }
     return false;
   } catch (error: any) {
-    logger.error(
-      userId,
+    logger.error(userId, 
       `CATCH_ERROR : rejoinPlayingTablePopUp :: userId : ${userId} :: gameId : ${gameId} :: lobbyId:${lobbyId} :: `,
-      error,
+      error
     );
     if (error && error.type === MESSAGES.ALERT_MESSAGE.REJOIN_POPUP_TYPE) {
       CommonEventEmitter.emit(EVENTS.SHOW_POPUP, {
@@ -292,15 +262,15 @@ const rejoinPlayingTablePopUp = async (
             errorMessage:
               process.env.NODE_ENV === PRODUCTION
                 ? error.reason
-                : error && error.reason && typeof error.reason === 'string'
+                : error && error.reason && typeof error.reason === "string"
                   ? error.reason
-                  : 'Rejoin Fail',
+                  : "Rejoin Fail",
           },
         },
         // socket.metrics,
         socket.userId,
         tableId,
-        ack,
+        ack
       );
     }
     return false;
@@ -313,15 +283,14 @@ const cancelRejoinPlayingTimer = async (
   tableId: string,
   userId: string,
   gameId: string,
-  lobbyId: string,
+  lobbyId: string
 ) => {
   try {
     await removeRejoinTableHistory(userId, gameId, lobbyId);
   } catch (e) {
-    logger.error(
-      tableId,
+    logger.error(tableId, 
       `CATCH_ERROR : cancelRejoinPlayingTimer : tableId : ${tableId} :: userId : ${userId} :: gameId : ${gameId} :: lobbyId:${lobbyId} :: `,
-      e,
+      e
     );
   }
 };

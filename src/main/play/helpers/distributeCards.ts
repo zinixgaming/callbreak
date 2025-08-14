@@ -1,6 +1,6 @@
 import logger from '../../logger';
-import {SINGLE_DECK, NUMERICAL, STATIC_USER_CARD} from '../../../constants';
-import {playerPlayingDataIf} from '../../interface/playerPlayingTableIf';
+import { SINGLE_DECK, NUMERICAL, STATIC_USER_CARD } from '../../../constants';
+import { playerPlayingDataIf } from '../../interface/playerPlayingTableIf';
 import Validator from '../../Validator';
 
 function shuffleCards(cards: string[]) {
@@ -55,17 +55,20 @@ async function setCardSuitWise(card: string[]) {
 async function distributeCards(
   playersData: playerPlayingDataIf[],
   isFTUE: boolean,
-  counter: number,
+  counter : number
 ) {
   try {
-    playersData =
-      await Validator.methodValidator.distributeCardsValidator(playersData);
+    playersData = await Validator.methodValidator.distributeCardsValidator(
+      playersData,
+    );
 
     /** club,diamond,heart,spade */
+   
 
     let tempUsersCards: Array<string[]> = [];
 
-    if (counter == NUMERICAL.ONE) {
+    if(counter == NUMERICAL.ONE){
+
       const cards = [...SINGLE_DECK];
       logger.info('distributeCards : user Card :: ', JSON.stringify(cards));
       // const spadeCardArr = cards.splice(-13);
@@ -83,13 +86,15 @@ async function distributeCards(
       } else {
         tempUsersCards = [...STATIC_USER_CARD];
       }
-    } else {
+
+    }
+    else{
       //second time cards Distribution
-      logger.info('<<== second time cards Distribution ==>>');
+      logger.info("<<== second time cards Distribution ==>>");
       const cards = [...SINGLE_DECK];
       logger.info('distributeCards : user Card :: ', JSON.stringify(cards));
       const spadeCardArr = cards.splice(-4);
-      console.log('length =>', spadeCardArr.length, cards.length);
+      console.log("length =>", spadeCardArr.length, cards.length);
       // giving 13 cards to each player
       if (!isFTUE) {
         for (let i = 0; i < playersData.length; ++i) {
@@ -105,6 +110,7 @@ async function distributeCards(
       } else {
         tempUsersCards = [...STATIC_USER_CARD];
       }
+
     }
 
     logger.info(

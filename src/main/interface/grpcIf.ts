@@ -13,7 +13,7 @@ export interface createCardGameTableReqIF {
   lobbyId: number;
   gameId: number;
   gameTableId: string;
-  // @ts-expect-error - userIdToSessionIds type is not properly defined
+  // @ts-ignore
   userIdToSessionIds;
   requestId?: string;
 }

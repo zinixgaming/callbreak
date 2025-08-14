@@ -2,7 +2,7 @@ import AWS from 'aws-sdk';
 import Logger from '../logger';
 
 const sendTOSns = (jsonObj: any, awsConfig: any) => {
-  AWS.config.update({region: awsConfig.AWS_REGION});
+  AWS.config.update({ region: awsConfig.AWS_REGION });
 
   const snsObj = {
     payload: JSON.stringify(jsonObj),
@@ -18,7 +18,7 @@ const sendTOSns = (jsonObj: any, awsConfig: any) => {
   Logger.info('--TopicArn-- from sendToSNS', params.TopicArn);
 
   // Create promise and SNS service object
-  const publishTextPromise = new AWS.SNS({apiVersion: '2010-03-31'})
+  const publishTextPromise = new AWS.SNS({ apiVersion: '2010-03-31' })
     .publish(params)
     .promise();
 

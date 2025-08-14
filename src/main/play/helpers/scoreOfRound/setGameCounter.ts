@@ -1,10 +1,10 @@
-import {userScoreIf} from '../../../interface/userScoreIf';
-import {gameWinnerCount, gameLossCount} from '../../../gameCount';
+import { userScoreIf } from '../../../interface/userScoreIf';
+import { gameWinnerCount, gameLossCount } from '../../../gameCount';
 import logger from '../../../logger';
 
 function setGameCounter(userScore: userScoreIf[], winner: number[]) {
   try {
-    const winnerUser = userScore.forEach(element => {
+    const winnerUser = userScore.forEach((element) => {
       if (element.seatIndex == winner[0]) {
         gameWinnerCount(element.userId.toString());
       } else {

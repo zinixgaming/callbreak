@@ -1,67 +1,59 @@
-import cancelBattle from '../../cancelBattle';
-import {getNextPlayer} from '../../../common';
+import cancelBattle = require("../../cancelBattle");
+import { getNextPlayer } from "../../../common";
 import {
   getTableData,
   getRoundTableData,
   getPlayerGamePlay,
   setPlayerGamePlay,
-} from '../../../gameTable/utils';
-import logger from '../../../logger';
-import {NUMERICAL} from '../../../../constants';
-import Scheduler from '../../../scheduler';
-import {playerPlayingDataIf} from '../../../interface/playerPlayingTableIf';
-import {playingTableIf} from '../../../interface/playingTableIf';
-import {roundTableIf} from '../../../interface/roundTableIf';
-import Errors from '../../../errors';
+} from "../../../gameTable/utils";
+import logger = require("../../../logger");
+import { NUMERICAL } from "../../../../constants";
+import Scheduler from "../../../scheduler";
+import { playerPlayingDataIf } from "../../../interface/playerPlayingTableIf";
+import { playingTableIf } from "../../../interface/playingTableIf";
+import { roundTableIf } from "../../../interface/roundTableIf";
+import Errors from "../../../errors";
 
 // change User Throw Card Turn
 const changeThrowCardTurn = async (tableId: string) => {
-  logger.debug(
-    tableId,
-    'changeThrowCardTurn : started with tableId :: ',
-    tableId,
-  );
-  const {getLock} = global;
+  logger.debug(tableId, "changeThrowCardTurn : started with tableId :: ", tableId);
+  const { getLock } = global;
   const changeThrowCardTurnLock = await getLock.acquire([tableId], 2000);
   try {
     const playingTable: playingTableIf = await getTableData(tableId);
-    const {currentRound, isFTUE} = playingTable;
+    const { currentRound, isFTUE } = playingTable;
     const tableGamePlay: roundTableIf = await getRoundTableData(
       tableId,
-      currentRound,
+      currentRound
     );
     const lastTurnPlayerData: playerPlayingDataIf = await getPlayerGamePlay(
       tableGamePlay.currentTurn,
-      tableId,
+      tableId
     );
     lastTurnPlayerData.isTurn = false;
     await setPlayerGamePlay(
       tableGamePlay.currentTurn,
       tableId,
-      lastTurnPlayerData,
+      lastTurnPlayerData
     );
     const playersGameData: playerPlayingDataIf[] = await Promise.all(
-      Object.keys(tableGamePlay.seats).map(async ele =>
-        getPlayerGamePlay(tableGamePlay.seats[ele].userId, tableId),
-      ),
+      Object.keys(tableGamePlay.seats).map(async (ele) =>
+        getPlayerGamePlay(tableGamePlay.seats[ele].userId, tableId)
+      )
     );
 
-    logger.info(
-      tableId,
-      'changeThrowCardTurn : playersGameData :: ',
-      playersGameData,
-    );
+    logger.info(tableId, "changeThrowCardTurn : playersGameData :: ", playersGameData);
 
     const nextTurn: string = await getNextPlayer(
       tableGamePlay.seats,
-      tableGamePlay.currentTurn,
+      tableGamePlay.currentTurn
     );
 
     // match fist Initiater and Last Initiater are Not equal then declare winnwer of turn and change User Turn
     if (tableGamePlay.lastInitiater !== nextTurn) {
       const playerGamePlay: playerPlayingDataIf = await getPlayerGamePlay(
         nextTurn,
-        tableId,
+        tableId
       );
       playerGamePlay.isTurn = true;
       await setPlayerGamePlay(nextTurn, tableId, playerGamePlay);
@@ -75,16 +67,15 @@ const changeThrowCardTurn = async (tableId: string) => {
       //       seatIndex: ele.seat,
       //     });
       // }
-      logger.info(
-        tableId,
-        'changeThrowCardTurn : userId :: ',
+      logger.info(tableId, 
+        "changeThrowCardTurn : userId :: ",
         playerGamePlay.userId,
-        'playerGamePlay :: ',
+        "playerGamePlay :: ",
         playerGamePlay,
-        ' : nextTurn :1: ',
+        " : nextTurn :1: ",
         nextTurn,
-        ' : nextTurn :2: ',
-        tableGamePlay.lastInitiater,
+        " : nextTurn :2: ",
+        tableGamePlay.lastInitiater
       );
 
       // Schedule Turn Setup Timer
@@ -110,10 +101,9 @@ const changeThrowCardTurn = async (tableId: string) => {
       });
     }
   } catch (e) {
-    logger.error(
-      tableId,
+    logger.error(tableId, 
       `CATCH_ERROR : changeThrowCardTurn : tableId: ${tableId} :: `,
-      e,
+      e
     );
     if (e instanceof Errors.CancelBattle) {
       await cancelBattle({

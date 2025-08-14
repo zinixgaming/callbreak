@@ -1,6 +1,7 @@
+/* eslint-disable node/no-unsupported-features/es-syntax */
 import logger from '../../../logger';
 import CommonEventEmitter from '../../../commonEventEmitter';
-import {FIND_BOT} from '../../../../constants/eventEmitter';
+import { FIND_BOT } from '../../../../constants/eventEmitter';
 
 const findBotProcess = async (job: any) => {
   try {

@@ -2,7 +2,7 @@ export interface userDetailInScoreIf {
   username: string;
   profilePicture: string;
   seatIndex: number;
-  userStatus: string;
+  userStatus : string;
 }
 
 export interface userScoreRoundIf {
@@ -26,7 +26,7 @@ export interface winnLossAmountIf {
 }
 
 export interface winningAmountIf {
-  winnLossAmount: winnLossAmountIf[];
+  winnLossAmount : winnLossAmountIf[];
 }
 
 export interface mainRoundScoreIf {
@@ -43,7 +43,7 @@ export interface userScoreIf {
   bid: number;
   hands: number;
   isLeft: boolean;
-  isAuto: boolean;
+  isAuto : boolean;
   roundBags: number;
   roundPoint: number;
   totalBags: number;

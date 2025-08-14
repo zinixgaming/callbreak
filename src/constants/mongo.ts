@@ -5,7 +5,7 @@ export = Object.freeze({
   ROUND_PLAY_TABLE: 'round_play_table',
   PLAYING_TRACKING_LOBBY: 'playing_traking_lobby',
   PLAYING_TRACKING_HISTORY: 'playing_traking_history',
-  FLAGE: 'flage',
+  FLAGE:'flage',
   LOBBY: 'lobby',
   admin: 'admin',
   USER: 'user',

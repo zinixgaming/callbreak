@@ -1,6 +1,6 @@
 // import UserProfileService from './service';
 // import UserProfileModel from './model';
-import {ObjectId} from 'mongodb';
+const { ObjectID } = require('mongodb');
 import query from './query';
 
 class DB {
@@ -11,7 +11,7 @@ class DB {
 
   init(db: any, client: any) {
     this.mongoClient = client;
-    this.ObjectId = ObjectId;
+    this.ObjectId = ObjectID;
     // this.mongo = new UserProfileService(new UserProfileModel(db));
     this.mongoQuery = new query(db);
   }

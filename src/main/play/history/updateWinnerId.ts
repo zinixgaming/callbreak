@@ -1,6 +1,6 @@
-import logger from '../../logger';
-import {getTurnHistory, setTurnHistory} from '../../gameTable/utils';
-import {playerPlayingDataIf} from '../../interface/playerPlayingTableIf';
+import logger  from '../../logger';
+import { getTurnHistory, setTurnHistory } from '../../gameTable/utils';
+import { playerPlayingDataIf } from '../../interface/playerPlayingTableIf';
 
 async function updateWinnerId(
   tableId: string,
@@ -11,22 +11,18 @@ async function updateWinnerId(
   const turnHistory = await getTurnHistory(tableId, roundNumber);
 
   const [winnerData] = playerGamePlay
-    .map(uData => {
+    .map((uData) => {
       logger.info(tableId, '===> uData L seatIndex<====', uData.seatIndex);
-      logger.info(
-        tableId,
-        '===> uData L winner.indexOf(uData.seatIndex) <====',
-        winner.indexOf(uData.seatIndex),
-      );
+      logger.info(tableId, '===> uData L winner.indexOf(uData.seatIndex) <====', winner.indexOf(uData.seatIndex));
       if (winner.indexOf(uData.seatIndex) !== -1) {
-        return {winnerId: [uData.userId], winnerSI: [uData.seatIndex]};
+        return {winnerId : [uData.userId], winnerSI : [uData.seatIndex]};
       }
-      return {winnerId: [], winnerSI: []};
+      return {winnerId : [], winnerSI : []};
     })
-    .filter(e => e);
+    .filter((e) => e);
 
-  logger.info(tableId, ' winnerData ::>> ', winnerData);
-
+   logger.info(tableId, " winnerData ::>> ", winnerData);
+    
   turnHistory.modifiedOn = new Date().toString();
   turnHistory.winnerId = winnerData.winnerId;
   turnHistory.winnerSI = winnerData.winnerSI;

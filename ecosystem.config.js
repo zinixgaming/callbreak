@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'callbreak',
-      script: 'pnpm start',
+      script: 'npm start',
       instances: 1,
       autorestart: true,
       watch: false,

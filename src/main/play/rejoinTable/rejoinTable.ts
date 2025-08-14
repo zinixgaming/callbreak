@@ -6,39 +6,34 @@ import {
   getRejoinTableHistory,
 } from '../../gameTable/utils';
 import rejoinPlayingTable from './index';
-import {rejoinPlayingTablePopUp} from './rejoinTablePopUp';
-import {userIf} from '../../interface/userSignUpIf';
-import {playingTableIf} from '../../interface/playingTableIf';
-import {playerPlayingDataIf} from '../../interface/playerPlayingTableIf';
-import {EVENTS, MESSAGES, NUMERICAL} from '../../../constants';
-import CommonEventEmitter from '../../commonEventEmitter';
+import { rejoinPlayingTablePopUp } from './rejoinTablePopUp';
+import { userIf } from '../../interface/userSignUpIf';
+import { playingTableIf } from '../../interface/playingTableIf';
+import { playerPlayingDataIf } from '../../interface/playerPlayingTableIf';
+import { EVENTS, MESSAGES, NUMERICAL } from '../../../constants';
+import CommonEventEmitter from "../../commonEventEmitter";
 
 // check Player Avalible in Playing for Re-join
 const rejoinTable = async (
   userData: userIf,
   roomFlag: boolean,
   socket: any,
-  ack?: (response: any) => void,
+  ack?: Function,
 ) => {
-  const {gameId, lobbyId, fromBack, userId, isFTUE, isAnyRunningGame} =
-    userData;
-  const {getLock} = global;
+  const { gameId, lobbyId, fromBack, userId, isFTUE, isAnyRunningGame } = userData;
+  const { getLock } = global;
   const {
-    getConfigData: {REJOIN_END_GAME_REASON},
+    getConfigData: {
+      REJOIN_END_GAME_REASON,
+    },
   } = global;
   // const rejoinTableLock = await getLock.acquire([userId], 2000);
   try {
-    logger.debug(
-      userId,
-      'rejoinTable :: fromBack ::',
-      fromBack,
-      'isAnyRunningGame :: ',
-      isAnyRunningGame,
-    );
+    logger.debug(userId, 'rejoinTable :: fromBack ::', fromBack, "isAnyRunningGame :: ",isAnyRunningGame);
 
     if (fromBack) {
       // check Player Back in game from Back_Ground
-      const rejoin = await rejoinPlayingTablePopUp(
+      let rejoin = await rejoinPlayingTablePopUp(
         userId,
         gameId,
         lobbyId,
@@ -49,21 +44,14 @@ const rejoinTable = async (
       );
       return rejoin;
     } else {
-      logger.info(
-        userId,
-        'rejoinTable : call else rejoinTable fromBack is false',
-      );
+      logger.info(userId,'rejoinTable : call else rejoinTable fromBack is false');
 
       const rejoinPlayerData = await getRejoinTableHistory(
         userId,
         gameId,
         lobbyId,
       );
-      logger.info(
-        userId,
-        'rejoinTable : rejoinPlayerData ::',
-        rejoinPlayerData,
-      );
+      logger.info(userId,'rejoinTable : rejoinPlayerData ::', rejoinPlayerData);
       if (!rejoinPlayerData) {
         // if(isAnyRunningGame) {
         //   const sendEventData = {
@@ -76,22 +64,22 @@ const rejoinTable = async (
         //     button_text: [
         //       MESSAGES.ALERT_MESSAGE.BUTTON_TEXT
         //         .EXIT /* MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.NO*/,
-        //       MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.NEW_GAME
+        //       MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.NEW_GAME 
         //     ],
         //     button_color: [MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED, MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.GREEN],
         //     button_methods: [
         //       MESSAGES.ALERT_MESSAGE.BUTTON_METHOD
         //         .EXIT /* MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.NO*/,
-        //       MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.YES
+        //       MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.YES 
         //     ],
         //     showLoader: false,
         //   };
         //   throw sendEventData;
         // }else{
-        return true;
+          return true;
         // }
       } else {
-        const {tableId, isEndGame} = rejoinPlayerData;
+        const { tableId, isEndGame } = rejoinPlayerData;
         if (!isEndGame) {
           const playingTableData: playingTableIf = await getTableData(tableId);
           if (!playingTableData) {
@@ -100,11 +88,7 @@ const rejoinTable = async (
           } else {
             const userPlayingTable: playerPlayingDataIf =
               await getPlayerGamePlay(userId, tableId);
-            logger.info(
-              userId,
-              'rejoinTable : userPlayingTable ::',
-              userPlayingTable,
-            );
+            logger.info(userId,'rejoinTable : userPlayingTable ::', userPlayingTable);
 
             if (!userPlayingTable) {
               await removeRejoinTableHistory(userId, gameId, lobbyId);
@@ -114,8 +98,7 @@ const rejoinTable = async (
                 await removeRejoinTableHistory(userId, gameId, lobbyId);
                 return true;
               } else {
-                logger.info(
-                  userId,
+                logger.info(userId,
                   'rejoinTable ::: rejoinTableOnKillApp ::: rejoin success fulliy ::: 11 :::',
                 );
                 rejoinPlayingTable(
@@ -131,14 +114,10 @@ const rejoinTable = async (
             }
           }
         } else {
-          logger.info(
-            userId,
-            'rejoinPlayingTablePopUp : send End Game Message.',
-            rejoinPlayerData,
-          );
+          logger.info(userId,"rejoinPlayingTablePopUp : send End Game Message.", rejoinPlayerData);
           await removeRejoinTableHistory(userId, gameId, lobbyId);
-
-          if (isAnyRunningGame) {
+          
+          if(isAnyRunningGame) {
             const sendEventData = {
               statusFlag: true,
               message: MESSAGES.ALERT_MESSAGE.REJOIN_POPUP_MESSAGE,
@@ -149,29 +128,26 @@ const rejoinTable = async (
               button_text: [
                 MESSAGES.ALERT_MESSAGE.BUTTON_TEXT
                   .EXIT /* MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.NO*/,
-                MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.NEW_GAME,
+                MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.NEW_GAME 
               ],
-              button_color: [
-                MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED,
-                MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.GREEN,
-              ],
+              button_color: [MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED, MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.GREEN],
               button_methods: [
                 MESSAGES.ALERT_MESSAGE.BUTTON_METHOD
                   .EXIT /* MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.NO*/,
-                MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.YES,
+                MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.YES 
               ],
               showLoader: false,
             };
             throw sendEventData;
-          } else {
+          }else{
             return true;
           }
+
         }
       }
     }
   } catch (error: any) {
-    logger.error(
-      userId,
+    logger.error(userId, 
       `CATCH_ERROR : rejoinTableOnKillApp ::: userId: ${userId} :: gameId: ${gameId} :: lobbyId: ${lobbyId} :: `,
       error,
     );
@@ -193,6 +169,7 @@ const rejoinTable = async (
       });
     }
     return false;
+
   } finally {
     // await getLock.release(rejoinTableLock);
   }

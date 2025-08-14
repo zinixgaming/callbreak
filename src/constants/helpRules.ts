@@ -1,3 +1,4 @@
 export = Object.freeze({
-  HELP: 'abcd',
-});
+    HELP: "abcd",
+  });
+  

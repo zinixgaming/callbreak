@@ -3,7 +3,7 @@ import createCardGameTableError from './createCardGameTable';
 import InsufficientFundError from './insufficientFunds';
 import InvalidInput from './invalidInput';
 import UnknownError from './unknown';
-import maintanenceError from './maintanenceError';
+import maintanenceError from "./maintanenceError";
 
 const exportObject = {
   CancelBattle,
@@ -11,6 +11,6 @@ const exportObject = {
   InsufficientFundError,
   UnknownError,
   createCardGameTableError,
-  maintanenceError,
+  maintanenceError
 };
 export = exportObject;

@@ -1,6 +1,6 @@
 import logger from '../../logger';
 import commonEventEmitter from '../../commonEventEmitter';
-import {ROUND_STARTED} from '../../../constants/eventEmitter';
+import { ROUND_STARTED } from '../../../constants/eventEmitter';
 
 const roundStartTimerProcess = async (job: any) => {
   try {

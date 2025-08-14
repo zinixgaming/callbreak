@@ -1,12 +1,14 @@
-import Bull from 'bull';
+const Bull = require('bull');
 import logger from '../../../logger';
-import {findBotProcess} from '../../processes';
-import {getConfig} from '../../../../config';
+import { findBotProcess } from '../../processes';
+import { getConfig } from '../../../../config';
 import Errors from '../../../errors';
-import {findBotIf} from '../../../interface/schedulerIf';
+import {
+  findBotIf,
+} from '../../../interface/schedulerIf';
 import Validator from '../../../Validator';
-import {BULL} from '../../../../constants';
-import url from 'url';
+import { BULL } from '../../../../constants';
+import url from "url"
 
 const {
   SCHEDULER_REDIS_PORT,
@@ -14,28 +16,23 @@ const {
   SCHEDULER_REDIS_PASSWORD,
   REDIS_DB,
   REDIS_CONNECTION_URL,
-  NODE_ENV,
+  NODE_ENV
 } = getConfig();
 
-const log: {host: string; port: number; password?: string; db?: number} = {
+
+const log: { host: string; port: number; password?: string; db?: number } = {
   host: SCHEDULER_REDIS_HOST,
   port: SCHEDULER_REDIS_PORT,
-  db: REDIS_DB,
+  db: REDIS_DB
 };
 
 if (SCHEDULER_REDIS_PASSWORD !== '') log.password = SCHEDULER_REDIS_PASSWORD;
 if (REDIS_DB !== '') log.db = REDIS_DB;
 
 let tableSnapshotQueue: any;
-if (NODE_ENV === 'PRODUCTION') {
-  const {port, hostname, auth} = url.parse(REDIS_CONNECTION_URL);
-  tableSnapshotQueue = new Bull(BULL.FIND_BOT, {
-    redis: {
-      host: hostname || 'localhost',
-      port: Number(port),
-      db: Number(REDIS_DB),
-    },
-  });
+if (NODE_ENV === "PRODUCTION") {
+  const { port, hostname, auth } = url.parse(REDIS_CONNECTION_URL);
+  tableSnapshotQueue = new Bull(BULL.FIND_BOT, {redis : {host : hostname, port:port, db : Number(REDIS_DB)} });
 } else {
   tableSnapshotQueue = new Bull(BULL.FIND_BOT, {
     redis: log,

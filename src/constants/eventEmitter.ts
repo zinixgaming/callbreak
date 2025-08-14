@@ -30,5 +30,6 @@ const exportObject = Object.freeze({
   FIND_BOT: 'findBot',
   TACK_BOT_BID_TURN: 'TACK_BOT_BID_TURN',
   TACK_BOT_TURN: 'TACK_BOT_TURN',
+
 });
 export = exportObject;

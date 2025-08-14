@@ -1,6 +1,7 @@
+/* eslint-disable node/no-unsupported-features/es-syntax */
 import logger from '../../logger';
 import CommonEventEmitter from '../../commonEventEmitter';
-import {INITIALIZE_GAME_PLAY} from '../../../constants/eventEmitter';
+import { INITIALIZE_GAME_PLAY } from '../../../constants/eventEmitter';
 
 const initializeGameplayProcess = async (job: any) => {
   try {

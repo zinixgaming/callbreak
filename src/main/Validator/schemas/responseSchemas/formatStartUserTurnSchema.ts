@@ -1,4 +1,4 @@
-import Joi from 'joi';
+const Joi = require('joi');
 
 const formatStartUserTurnSchema = Joi.object().keys({
   seatIndex: Joi.number().required().description('seat Index'),

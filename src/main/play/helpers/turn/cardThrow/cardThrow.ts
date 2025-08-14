@@ -17,30 +17,30 @@ import {
 import CommonEventEmitter from '../../../../commonEventEmitter';
 import Scheduler from '../../../../scheduler';
 import changeThrowCardTurn from '../changeThrowCardTurn';
-import {playerPlayingDataIf} from '../../../../interface/playerPlayingTableIf';
-import {playingTableIf} from '../../../../interface/playingTableIf';
-import {roundTableIf} from '../../../../interface/roundTableIf';
-import {throwErrorIF} from '../../../../interface/throwError';
+import { playerPlayingDataIf } from '../../../../interface/playerPlayingTableIf';
+import { playingTableIf } from '../../../../interface/playingTableIf';
+import { roundTableIf } from '../../../../interface/roundTableIf';
+import { throwErrorIF } from '../../../../interface/throwError';
 import socketAck from '../../../../../socketAck';
 import cancelBattle from '../../../cancelBattle';
 import Errors from '../../../../errors';
-import {cardThrowRequestIf} from '../../../../interface/requestIf';
-import {updateTurnHistory} from '../../../history';
-import {formantUserThrowCardShowIf} from '../../../../interface/responseIf';
-import {formatUserThrowCardShow} from '../../playHelper';
-import {getCardNumber} from './utile';
+import { cardThrowRequestIf } from '../../../../interface/requestIf';
+import { updateTurnHistory } from '../../../history';
+import { formantUserThrowCardShowIf } from '../../../../interface/responseIf';
+import { formatUserThrowCardShow } from '../../playHelper';
+import { getCardNumber } from './utile';
 
 // User Card Throw on Board
 async function cardThrow(
   data: cardThrowRequestIf,
   socket: any,
-  ack?: (response: any) => void,
+  ack?: Function,
 ) {
   logger.debug('cardThrow : info :: ', data);
-  const {card} = data;
-  const {tableId, userId} = socket.eventMetaData;
-  const {getLock} = global;
-  const cardThrowLock = await getLock.acquire([`cardThrow:${tableId}`], 2000);
+  const { card } = data;
+  const { tableId, userId } = socket.eventMetaData;
+  const { getLock } = global;
+  let cardThrowLock = await getLock.acquire([`cardThrow:${tableId}`], 2000);
   try {
     const playingTable: playingTableIf = await getTableData(tableId);
     if (!playingTable) {
@@ -51,7 +51,7 @@ async function cardThrow(
       };
       throw errorObj;
     }
-    const {currentRound} = playingTable;
+    const { currentRound } = playingTable;
 
     const promises = await Promise.all([
       getPlayerGamePlay(userId, tableId),
@@ -106,15 +106,15 @@ async function cardThrow(
         a.split('-')[0] === roundObj.turnCardSequence
           ? 14
           : a.split('-')[0] === roundObj.turnCardSequence
-            ? Number(a.split('-')[1])
-            : 0;
+          ? Number(a.split('-')[1])
+          : 0;
       const cardB =
         Number(b.split('-')[1]) === 1 &&
         b.split('-')[0] === roundObj.turnCardSequence
           ? 14
           : b.split('-')[0] === roundObj.turnCardSequence
-            ? Number(b.split('-')[1])
-            : 0;
+          ? Number(b.split('-')[1])
+          : 0;
       return cardB - cardA;
     });
 
@@ -193,6 +193,7 @@ async function cardThrow(
     //   };
     //   throw errorObj;
     // }
+    
 
     // spades card
     // if (
@@ -255,6 +256,8 @@ async function cardThrow(
         card,
         playerObj.currentCards,
       );
+
+      playerObj.currentCards = playerObj.currentCards;
 
       const turnCards = roundObj.turnCurrentCards;
       turnCards.splice(playerObj.seatIndex, 1, card);
@@ -338,7 +341,7 @@ async function cardThrow(
       );
     }
   } finally {
-    if (cardThrowLock) {
+    if(cardThrowLock){
       await getLock.release(cardThrowLock);
     }
   }

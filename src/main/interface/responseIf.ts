@@ -1,11 +1,11 @@
-import {playerPlayingDataIf} from './playerPlayingTableIf';
-import {userSeatKeyIf} from './roundTableIf';
+import { playerPlayingDataIf } from "./playerPlayingTableIf";
+import { userSeatKeyIf } from "./roundTableIf";
 import {
   mainRoundScoreIf,
   roundScoreIf,
   userScoreTotalIf,
-  winningAmountIf,
-} from './userScoreIf';
+  winningAmountIf
+} from "./userScoreIf";
 
 export interface formatSingUpInfoIf {
   _id: string;
@@ -33,9 +33,9 @@ export interface formatGameTableInfoIf {
   tableId: string;
   roundTableId: string;
   totalPlayers: number;
-  totalRound: number;
-  currentRound: number;
-  winnningAmonut: string;
+  totalRound : number;
+  currentRound : number;
+  winnningAmonut : string;
   noOfPlayer: number;
   seats: Array<userSeatKeyIf>;
   seatIndex: number;
@@ -52,8 +52,8 @@ export interface formatRejoinTableInfoIf {
   tableState: string;
   totalPlayers: number;
   totalRound: number;
-  currentRound: number;
-  winnningAmonut: string;
+  currentRound : number;
+  winnningAmonut : string;
   noOfPlayer: string;
   seatIndex: number;
   turnCurrentCards: string[];
@@ -63,10 +63,10 @@ export interface formatRejoinTableInfoIf {
   dealerPlayer: number;
   isBidTurn: boolean | undefined;
   currentTurnTimer: number | undefined;
-  userBalance: number;
-  remaningRoundTimer: number;
+  userBalance : number;
+  remaningRoundTimer : number;
   playarDetail: playerPlayingDataIf[];
-  massage: string;
+  massage : string;
 }
 
 export interface upadedBalanceIf {
@@ -77,19 +77,19 @@ export interface upadedBalanceIf {
 export interface formatCollectBootValueIf {
   bootValue: number;
   userIds: Array<string>;
-  balance: upadedBalanceIf[];
+  balance: upadedBalanceIf[]
 }
 
 export interface formatStartUserBidTurnIf {
   time: number;
-  seatIndexList: number[];
+  seatIndexList : number[];
   bid?: number;
 }
 
 export interface formatCardDistributionIf {
   cards: Array<string>;
   dealer: number;
-  currentRound: number;
+  currentRound : number;
 }
 
 export interface formentUserBidShowIf {
@@ -118,9 +118,9 @@ export interface formatWinnerDeclareIf {
   timer?: number;
   roundScoreHistory: mainRoundScoreIf;
   roundTableId: string;
-  winningAmount?: winningAmountIf;
+  winningAmount?: winningAmountIf ;
   winner: Array<number | null>;
-  nextRound: number;
+  nextRound : number;
 }
 export interface formantUserThrowCardShowIf {
   seatIndex: number;

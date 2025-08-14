@@ -1,6 +1,6 @@
-import {playerPlayingDataIf} from './playerPlayingTableIf';
-import {playingTableIf} from './playingTableIf';
-import {roundTableIf} from './roundTableIf';
+import { playerPlayingDataIf } from './playerPlayingTableIf';
+import { playingTableIf } from './playingTableIf';
+import { roundTableIf } from './roundTableIf';
 
 export interface userTableJoinedIf {
   tableData: playingTableIf;

@@ -10,8 +10,8 @@ export = Object.freeze({
     YES: 'Yes',
     NO: 'No',
     EXIT: 'Exit',
-    REJOIN: 'Rejoin',
-    NEW_GAME: 'New Game',
+    REJOIN : 'Rejoin',
+    NEW_GAME : 'New Game',
   },
   BUTTON_COLOR: {
     RED: 'red',

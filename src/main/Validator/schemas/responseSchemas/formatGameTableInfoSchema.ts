@@ -1,6 +1,6 @@
 import seatsSchema from '../methodSchemas/seatsSchema';
 
-import Joi from 'joi';
+const Joi = require('joi');
 
 const formatGameTableInfoSchema = Joi.object().keys({
   isRejoin: Joi.boolean().required().description('Rehjoin Data'),
@@ -14,9 +14,9 @@ const formatGameTableInfoSchema = Joi.object().keys({
   tableId: Joi.string().required().description('table Id'),
   roundTableId: Joi.string().required().description('table Id'),
   totalPlayers: Joi.number().required().description('total Player'),
-  totalRound: Joi.number().required().description('totalRound'),
-  currentRound: Joi.number().required().description('currentRound'),
-  winnningAmonut: Joi.string().required().description('winnningAmonut'),
+  totalRound : Joi.number().required().description('totalRound'),
+  currentRound : Joi.number().required().description('currentRound'),
+  winnningAmonut : Joi.string().required().description('winnningAmonut'),
   noOfPlayer: Joi.number().required().description('total max Player'),
   seats: Joi.array().items(seatsSchema),
   isFTUE: Joi.boolean().required().description('tutorial playing flag'),

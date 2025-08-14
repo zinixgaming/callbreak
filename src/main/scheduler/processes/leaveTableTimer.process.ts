@@ -1,6 +1,7 @@
+/* eslint-disable node/no-unsupported-features/es-syntax */
 import logger from '../../logger';
 import CommonEventEmitter from '../../commonEventEmitter';
-import {TIME_OUT_TO_LEAVE_TABLE} from '../../../constants/eventEmitter';
+import { TIME_OUT_TO_LEAVE_TABLE } from '../../../constants/eventEmitter';
 
 const leaveTableTimerProcess = async (job: any) => {
   try {

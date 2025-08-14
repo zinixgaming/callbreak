@@ -1,14 +1,10 @@
 import logger from '../../logger';
-import {insertNewPlayer} from '../../gameTable';
+import { insertNewPlayer } from '../../gameTable';
 import REDIS from '../../redis';
-import {PREFIX} from '../../../constants/redis';
+import { PREFIX } from '../../../constants/redis';
 
-async function newGameStartHandler(
-  data: any,
-  socket: any,
-  ack?: (response: any) => void,
-) {
-  const {userId} = socket.eventMetaData;
+async function newGameStartHandler(data: any, socket: any, ack?: Function) {
+  const { userId } = socket.eventMetaData;
   const keyForUser = `${PREFIX.USER}:${userId}`;
   const userInfo = await REDIS.commands.getValueFromKey(keyForUser);
 

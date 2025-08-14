@@ -1,15 +1,15 @@
 import logger from '../../logger';
 import userRejoin from '../../signUp/userRejoin';
-import {PLAYER_STATE} from '../../../constants';
-import {userRejoinHelperRequestIf} from '../../interface/requestIf';
+import { PLAYER_STATE } from '../../../constants';
+import { userRejoinHelperRequestIf } from '../../interface/requestIf';
 import Validator from '../../Validator';
 
 async function userRejoinHelper(
-  {data: userData}: userRejoinHelperRequestIf,
+  { data: userData }: userRejoinHelperRequestIf,
   socket: any,
-  ack?: (response: any) => void,
+  ack?: Function,
 ) {
-  const {eventMetaData}: any = socket;
+  const { eventMetaData }: any = socket;
   try {
     logger.debug(eventMetaData.tableId, 'call userRejoinHelper :: ', userData);
     userData = await Validator.requestValidator.userRejoinValidator(userData);
@@ -19,8 +19,7 @@ async function userRejoinHelper(
     };
     return userRejoin(data, socket, ack).catch((e: any) => logger.error(e));
   } catch (error) {
-    logger.error(
-      eventMetaData.tableId,
+    logger.error(eventMetaData.tableId, 
       `CATCH_ERROR : userRejoinHelper :: userId: ${eventMetaData.userId} :: tableId: ${eventMetaData.tableId} :: `,
       userData,
       error,

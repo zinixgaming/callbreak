@@ -24,9 +24,9 @@ import {
   NUMERICAL,
   INSTRUMENTATION_EVENTS,
 } from '../../../../constants';
-import {playerPlayingDataIf} from '../../../interface/playerPlayingTableIf';
-import {roundTableIf} from '../../../interface/roundTableIf';
-import {playingTableIf} from '../../../interface/playingTableIf';
+import { playerPlayingDataIf } from '../../../interface/playerPlayingTableIf';
+import { roundTableIf } from '../../../interface/roundTableIf';
+import { playingTableIf } from '../../../interface/playingTableIf';
 import cancelBattle from '../../cancelBattle';
 import Errors from '../../../errors';
 import CommonEventEmitter from '../../../commonEventEmitter';
@@ -37,12 +37,12 @@ const userLeaveOnWaitingPlayer = async (
   roundPlayingTable: roundTableIf,
   playingTable: playingTableIf,
 ) => {
-  const {gameId, lobbyId, gameType}: any = playingTable;
-  const {getLock} = global;
+  const { gameId, lobbyId, gameType }: any = playingTable;
+  const { getLock } = global;
   const Key = `${gameType}:${gameId}:${lobbyId}`;
   const userLeaveOnWaitingPlayerLock = await getLock.acquire([Key], 2000);
   try {
-    Object.keys(roundPlayingTable.seats).filter(key => {
+    Object.keys(roundPlayingTable.seats).filter((key) => {
       if (roundPlayingTable.seats[key].length != 0) {
         if (roundPlayingTable.seats[key].userId === playerInfo.userId)
           roundPlayingTable.seats[key] = {};
@@ -51,12 +51,8 @@ const userLeaveOnWaitingPlayer = async (
 
     roundPlayingTable.totalPlayers -= 1;
     roundPlayingTable.tableState = TABLE_STATE.WAITING_FOR_PLAYERS;
-
-    logger.info(
-      playerInfo.userId,
-      'userLeaveOnWaitingPlayer :: roundPlayingTable :: >> ',
-      roundPlayingTable,
-    );
+    
+    logger.info(playerInfo.userId, "userLeaveOnWaitingPlayer :: roundPlayingTable :: >> ", roundPlayingTable);
     await setRoundTableData(
       playingTable._id,
       playingTable.currentRound,
@@ -64,17 +60,12 @@ const userLeaveOnWaitingPlayer = async (
     );
 
     await removePlayerGameData(playerInfo.userId, playingTable._id);
-    logger.info(
-      playerInfo.userId,
-      'remove user from playing  :::::::==>>',
-      playerInfo.userId,
-    );
+    logger.info(playerInfo.userId, "remove user from playing  :::::::==>>", playerInfo.userId);
 
     await removeUser(playerInfo.userId);
     await removeRejoinTableHistory(playerInfo.userId, gameId, lobbyId);
   } catch (e) {
-    logger.error(
-      playerInfo.userId,
+    logger.error(playerInfo.userId, 
       `CATCH_ERROR : userLeaveOnWaitingPlayer : lobbyId: ${lobbyId} : gameType: ${gameType} : gameId: ${gameId} : tableId: ${playingTable._id}:: `,
       e,
     );
@@ -86,10 +77,11 @@ const userLeaveOnWaitingPlayer = async (
 
 // remove playing table Document after All User Leave
 const manageLeaveTable = async (tableId: string) => {
-  const {getLock} = global;
+  const { getLock } = global;
   const key = `${NUMERICAL.ONE}:${tableId}`;
   const manageLeaveTableLock = await getLock.acquire([key], 2000);
   try {
+
     const playingTable: playingTableIf = await getTableData(tableId);
     const currentRound = playingTable.currentRound;
     const roundPlayingTable: roundTableIf = await getRoundTableData(
@@ -97,17 +89,16 @@ const manageLeaveTable = async (tableId: string) => {
       currentRound,
     );
 
-    logger.info(
-      tableId,
+    logger.info(tableId, 
       'manageLeaveTable : call : roundPlayingTable :: ',
       roundPlayingTable,
     );
     const userData = Object.keys(roundPlayingTable.seats).filter(
-      ele => roundPlayingTable.seats[ele],
+      (ele) => roundPlayingTable.seats[ele],
     );
 
     const playersPlayingData = await Promise.all(
-      Object.keys(roundPlayingTable.seats).map(async ele =>
+      Object.keys(roundPlayingTable.seats).map(async (ele) =>
         getPlayerGamePlay(roundPlayingTable.seats[ele].userId, tableId),
       ),
     );
@@ -140,11 +131,10 @@ const manageLeaveTable = async (tableId: string) => {
     // });
 
     let ucount: number = 0;
-    const noOfPlayer: number = Number(roundPlayingTable.noOfPlayer);
+    let noOfPlayer: number = Number(roundPlayingTable.noOfPlayer);
 
-    Object.keys(roundPlayingTable.seats).filter(key => {
-      logger.info(
-        tableId,
+    Object.keys(roundPlayingTable.seats).filter((key) => {
+      logger.info(tableId, 
         'manageLeaveTable : roundPlayingTable.seats[key].length :: ',
         Object.keys(roundPlayingTable.seats[key]).length,
         ' : manageLeaveTable : key :: ',
@@ -162,24 +152,17 @@ const manageLeaveTable = async (tableId: string) => {
       logger.info('manageLeaveTable : delete :');
 
       // Remove Playing Document and History
-      removeAllPlayingTableAndHistory(
-        playingTable,
-        roundPlayingTable,
-        currentRound,
-      );
+      removeAllPlayingTableAndHistory(playingTable, roundPlayingTable, currentRound);
     } else if (ucount === 2 && noOfPlayer == NUMERICAL.TWO) {
       // delear Winner
       declareWinner(tableId);
-    } else if (ucount === 4 && noOfPlayer == NUMERICAL.FOUR) {
+    }
+    else if (ucount === 4 && noOfPlayer == NUMERICAL.FOUR) {
       // delear Winner
       declareWinner(tableId);
     }
   } catch (e) {
-    logger.error(
-      tableId,
-      `CATCH_ERROR : manageLeaveTable : tableId: ${tableId} :: `,
-      e,
-    );
+    logger.error(tableId, `CATCH_ERROR : manageLeaveTable : tableId: ${tableId} :: `, e);
     throw e;
   } finally {
     logger.info(tableId, 'manageLeaveTable : Lock : ', key);
@@ -191,39 +174,35 @@ const manageLeaveTable = async (tableId: string) => {
 const removeAllPlayingTableAndHistory = async (
   playingTable: playingTableIf,
   roundPlayingTable: roundTableIf,
-  updatedCurrentRound: number,
+  updatedCurrentRound : number,
 ) => {
-  logger.info(
-    playingTable._id,
+  logger.info(playingTable._id, 
     'removeAllPlayingTableAndHistory : call : tableId :: ',
     playingTable._id,
   );
-  logger.info(
-    playingTable._id,
-    'removeAllPlayingTableAndHistory : call : updatedCurrentRound :: ',
-    updatedCurrentRound,
-  );
+  logger.info(playingTable._id, 'removeAllPlayingTableAndHistory : call : updatedCurrentRound :: ',updatedCurrentRound);
 
-  const {_id: tableId, currentRound, gameId, lobbyId, gameType} = playingTable;
-  const {getLock} = global;
+  const {
+    _id: tableId,
+    currentRound,
+    gameId,
+    lobbyId,
+    gameType,
+  } = playingTable;
+  const { getLock } = global;
   const key = `${lobbyId}:${tableId}`;
   const removeAllPlayingTableAndHistoryLock = await getLock.acquire(
     [key],
     2000,
   );
   try {
-    const {seats: playerSeats, tableState} = roundPlayingTable;
-    logger.info(
-      tableId,
-      'removeAllPlayingTableAndHistory : tableId :: ',
-      tableId,
-    );
+    const { seats: playerSeats, tableState } = roundPlayingTable;
+    logger.info(tableId, 'removeAllPlayingTableAndHistory : tableId :: ', tableId);
     const queueKey = `${gameType}:${lobbyId}`;
 
     if (tableState === TABLE_STATE.WAITING_FOR_PLAYERS) {
       //remove table on Queue
-      logger.info(
-        tableId,
+      logger.info(tableId, 
         'removeAllPlayingTableAndHistory : popTableFromQueue :: popTableFromQueue.',
       );
 
@@ -232,26 +211,21 @@ const removeAllPlayingTableAndHistory = async (
       await remTableFromQueue(queueKey, tableId);
     }
 
+
     //Remove Playing Table in redis
     await removeTableData(tableId);
 
     // Remove All User Deatil in Redis
     await Promise.all(
-      Object.keys(playerSeats).filter(async ele => {
+      Object.keys(playerSeats).filter(async (ele) => {
         if (Object.keys(playerSeats[ele]).length != 0) {
-          const playerGamePlayData = await getPlayerGamePlay(
-            playerSeats[ele].userId,
-            tableId,
-          );
+
+          const playerGamePlayData = await getPlayerGamePlay(playerSeats[ele].userId, tableId);
           if (playerGamePlayData.isLeft == false) {
             removeUser(playerSeats[ele].userId);
           }
 
-          logger.info(
-            tableId,
-            'remove user from playing:::::::::::::::::::2222222::::',
-            playerSeats[ele].userId,
-          );
+          logger.info(tableId, "remove user from playing:::::::::::::::::::2222222::::", playerSeats[ele].userId);
           removePlayerGameData(playerSeats[ele].userId, tableId);
           const userRejoinInfo = await getRejoinTableHistory(
             playerSeats[ele].userId,
@@ -282,18 +256,15 @@ const removeAllPlayingTableAndHistory = async (
           // );
 
           await Scheduler.cancelJob.newRoundStartTimerCancel(
-            `${tableId}:${updatedCurrentRound}`,
-          );
+            `${tableId}:${updatedCurrentRound}`
+          )
+
         }
       }),
     );
 
     for (let i = 1; i <= currentRound; i++) {
-      logger.info(
-        logger.info,
-        'removeAllPlayingTableAndHistory : remove : i :: ',
-        i,
-      );
+      logger.info(logger.info, 'removeAllPlayingTableAndHistory : remove : i :: ', i);
       // Remove All Round Detail in Redis
       removeRoundTableData(tableId, i);
       // Remove All Round Bid History Detail in Redis
@@ -305,8 +276,7 @@ const removeAllPlayingTableAndHistory = async (
     //Remove Scour History in redis
     await removeRoundScoreHistory(tableId);
   } catch (e) {
-    logger.error(
-      tableId,
+    logger.error(tableId, 
       `CATCH_ERROR : removeAllPlayingTableAndHistory : tableId:${tableId} :: currentRound:${currentRound} :: gameId: ${gameId} :: lobbyId: ${lobbyId} :: gameType: ${gameType} : `,
       e,
     );
@@ -319,7 +289,7 @@ const removeAllPlayingTableAndHistory = async (
 // delear Winner
 const declareWinner = async (tableId: string) => {
   logger.info(`declareWinner ::: call`);
-  const {getLock} = global;
+  const { getLock } = global;
   const key = `${tableId}:${NUMERICAL.TEN}`;
   const declareWinnerLock = await getLock.acquire([tableId], 2000);
   try {
@@ -332,13 +302,12 @@ const declareWinner = async (tableId: string) => {
     );
 
     const playerSeats = roundPlayingTable.seats;
-    const noOfPlayer: number = Number(roundPlayingTable.noOfPlayer);
-    logger.info(
-      tableId,
+    let noOfPlayer: number = Number(roundPlayingTable.noOfPlayer);
+    logger.info(tableId, 
       `declareWinner ::: call next One :: playerSeats : ${JSON.stringify(playerSeats)}`,
     );
     const playersPlayingData: playerPlayingDataIf[] = await Promise.all(
-      Object.keys(playerSeats).map(async ele =>
+      Object.keys(playerSeats).map(async (ele) =>
         getPlayerGamePlay(playerSeats[ele].userId, tableId),
       ),
     );
@@ -370,12 +339,9 @@ const declareWinner = async (tableId: string) => {
         tableId: tableId.toString(),
       });
     }
+
   } catch (e) {
-    logger.error(
-      tableId,
-      `CATCH_ERROR : declareWinner : tableId: ${tableId} :: `,
-      e,
-    );
+    logger.error(tableId, `CATCH_ERROR : declareWinner : tableId: ${tableId} :: `, e);
     if (e instanceof Errors.CancelBattle) {
       await cancelBattle({
         tableId,
@@ -392,19 +358,19 @@ const userLeaveOnLock = async (
   playerInfo: playerPlayingDataIf,
   roundPlayingTable: roundTableIf,
   playingTable: playingTableIf,
-  isDeductedEntryFee: boolean,
+  isDeductedEntryFee : boolean
 ) => {
-  const {_id: tableId, currentRound, gameId, lobbyId, gameType} = playingTable;
+  const {
+    _id: tableId,
+    currentRound,
+    gameId,
+    lobbyId,
+    gameType,
+  } = playingTable;
 
   let sendStatus = false;
-  logger.info(
-    'userLeaveOnLock  :: isDeductedEntryFee ::>>',
-    isDeductedEntryFee,
-  );
-  if (
-    roundPlayingTable.tableState === TABLE_STATE.ROUND_TIMER_STARTED ||
-    !isDeductedEntryFee
-  ) {
+  logger.info("userLeaveOnLock  :: isDeductedEntryFee ::>>", isDeductedEntryFee);
+  if (roundPlayingTable.tableState === TABLE_STATE.ROUND_TIMER_STARTED || !isDeductedEntryFee) {
     const queueKey = `${gameType}:${lobbyId}`;
     await Scheduler.cancelJob.initializeGameplayCancel(`${tableId}`);
     await Scheduler.cancelJob.roundStartTimerCancel(`${tableId}`);
@@ -424,3 +390,4 @@ const exportObject = {
   userLeaveOnLock,
 };
 export = exportObject;
+;

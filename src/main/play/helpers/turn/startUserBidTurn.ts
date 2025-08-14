@@ -1,26 +1,26 @@
-import logger from '../../../logger';
-import Scheduler from '../../../scheduler';
-import {formatStartUserBidTurn} from '../playHelper';
+import logger from "../../../logger";
+import Scheduler from "../../../scheduler";
+import { formatStartUserBidTurn } from "../playHelper";
 import {
   ERROR_TYPE,
   EVENTS,
   MESSAGES,
   NUMERICAL,
   TABLE_STATE,
-} from '../../../../constants';
-import CommonEventEmitter from '../../../commonEventEmitter';
+} from "../../../../constants";
+import CommonEventEmitter from "../../../commonEventEmitter";
 import {
   getRoundTableData,
   setRoundTableData,
   getPlayerGamePlay,
-} from '../../../gameTable/utils';
-import {playingTableIf} from '../../../interface/playingTableIf';
-import {playerPlayingDataIf} from '../../../interface/playerPlayingTableIf';
-import {roundTableIf} from '../../../interface/roundTableIf';
-import cancelBattle from '../../cancelBattle';
-import Errors from '../../../errors';
-import {throwErrorIF} from '../../../interface/throwError';
-import startRound from '../../startRound';
+} from "../../../gameTable/utils";
+import { playingTableIf } from "../../../interface/playingTableIf";
+import { playerPlayingDataIf } from "../../../interface/playerPlayingTableIf";
+import { roundTableIf } from "../../../interface/roundTableIf";
+import cancelBattle from "../../cancelBattle";
+import Errors from "../../../errors";
+import { throwErrorIF } from "../../../interface/throwError";
+import startRound from "../../startRound";
 
 // manage Player Bid Turn Timer
 async function startUserBidTurn(
@@ -28,21 +28,21 @@ async function startUserBidTurn(
   playerGamePlays: playerPlayingDataIf[],
   nextTurn: string,
   dealerIndex: number,
-  dealerId: string,
+  dealerId: string
 ): Promise<boolean | any> {
-  logger.debug(tableData._id, 'startUserBidTurn : tableData :: ', tableData);
-  logger.info(
-    tableData._id,
-    'startUserBidTurn : playerGamePlays :: ',
+  logger.debug(tableData._id, "startUserBidTurn : tableData :: ", tableData);
+  logger.info(tableData._id,
+    "startUserBidTurn : playerGamePlays :: ",
     playerGamePlays,
-    ' : nextTurn :: ',
-    nextTurn,
+    " : nextTurn :: ",
+    nextTurn
   );
 
-  const {_id: tableId, isFTUE} = tableData;
-  const {getLock} = global;
+  const { _id: tableId, isFTUE } = tableData;
+  const { getLock } = global;
   const startUserBidTurnLock = await getLock.acquire([tableId], 2000);
   try {
+
     // resuffle cards
     const usersCards: Array<Array<string>> = [];
     for (let i = 0; i < playerGamePlays.length; i++) {
@@ -53,18 +53,18 @@ async function startUserBidTurn(
 
     let userCountInSpadeExist: number = NUMERICAL.ZERO;
     userCountInSpadeExist = await checkSpadesCards(usersCards);
-    logger.info(tableId, 'userCountInSpadeExist ==>>', userCountInSpadeExist);
+    logger.info(tableId, "userCountInSpadeExist ==>>", userCountInSpadeExist);
 
     if (userCountInSpadeExist !== usersCards.length) {
       let counter = NUMERICAL.ONE;
-      logger.info(tableId, '<<== Resuffle call ==>>');
+      logger.info(tableId, "<<== Resuffle call ==>>");
       CommonEventEmitter.emit(EVENTS.SHOW_POPUP, {
         tableId,
         data: {
           isPopup: false,
           popupType: MESSAGES.ALERT_MESSAGE.TYPE.TOAST_POPUP,
           message: MESSAGES.ERROR.RESUFFUL_YOUR_CARDS,
-        },
+        }
       });
       counter += 1;
       const roundTableData = await getRoundTableData(tableId, NUMERICAL.ONE);
@@ -73,19 +73,20 @@ async function startUserBidTurn(
         jobId: tableId,
         tableId,
         tableData: tableData,
-        roundTableData: roundTableData,
-      };
+        roundTableData: roundTableData
+      }
 
       CommonEventEmitter.emit(EVENTS.RESUFFLE_CARDS, {
         data,
         counter,
         nextTurn,
         dealerIndex,
-        dealerId,
+        dealerId
       });
 
       return false;
     }
+
 
     if (playerGamePlays.length <= 1) {
       const errorObj: throwErrorIF = {
@@ -98,7 +99,7 @@ async function startUserBidTurn(
     // throw new Error('startUserTurn :: Error: "playingTableData not found!!!"');
 
     const playerGamePlay = playerGamePlays.filter(
-      (e: playerPlayingDataIf) => e.userId === nextTurn,
+      (e: playerPlayingDataIf) => e.userId === nextTurn
     )[0];
 
     const resolvedPromise = await Promise.all([
@@ -109,37 +110,29 @@ async function startUserBidTurn(
     const tableGameData: roundTableIf = resolvedPromise[0];
     const userProfile: playerPlayingDataIf = resolvedPromise[1];
 
-    logger.info(
-      tableId,
-      'startUserBidTurn : tableGameData :: ',
+    logger.info(tableId,
+      "startUserBidTurn : tableGameData :: ",
       tableGameData,
-      ' : userProfile :: ',
+      " : userProfile :: ",
       userProfile,
-      ' : tableGameData : 3334454 :: ',
+      " : tableGameData : 3334454 :: ",
       typeof tableGameData.seats,
-      typeof tableGameData,
+      typeof tableGameData
     );
 
     tableGameData.currentTurn = playerGamePlay.userId;
     tableGameData.tableState = TABLE_STATE.BID_ROUND_STARTED;
     tableGameData.currentPlayerInTable = Object.keys(
-      tableGameData.seats,
-    ).filter(ele => tableGameData.seats[ele].userId).length;
+      tableGameData.seats
+    ).filter((ele) => tableGameData.seats[ele].userId).length;
 
     const seatIndexList: number[] = Object.keys(tableGameData.seats)
-      .filter(key =>
-        Object.prototype.hasOwnProperty.call(
-          tableGameData.seats[key],
-          'seatIndex',
-        ),
-      )
-      .map(key => tableGameData.seats[key].seatIndex);
+      .filter(key => tableGameData.seats[key].hasOwnProperty('seatIndex'))
+      .map(key => tableGameData.seats[key].seatIndex);;
 
-    logger.info('startUserBidTurn :: seatIndexList :: ', seatIndexList);
+    logger.info("startUserBidTurn :: seatIndexList :: ", seatIndexList)
 
-    tableGameData.tableCurrentTimer = Number(
-      new Date(),
-    ) /*+ NUMERICAL.FOUR * NUMERICAL.THOUSAND*/;
+    tableGameData.tableCurrentTimer = Number(new Date()) /*+ NUMERICAL.FOUR * NUMERICAL.THOUSAND*/;
 
     await Promise.all([
       setRoundTableData(tableId, tableData.currentRound, tableGameData),
@@ -147,7 +140,7 @@ async function startUserBidTurn(
 
     const eventBidTurnData = await formatStartUserBidTurn(
       tableData,
-      seatIndexList,
+      seatIndexList
     );
 
     // send User Bid Turn Started Socket Event
@@ -160,7 +153,7 @@ async function startUserBidTurn(
      * start Bid Turn Timer
      * need to restart turn timer sechduler
      */
-    logger.info(tableId, 'startUserBidTurn : Bid turn timer started -->>>>>');
+    logger.info(tableId, "startUserBidTurn : Bid turn timer started -->>>>>");
     if (userProfile.isBot) {
       logger.info('startUserBidTurn :: bot bit turn timer schedul ::');
       // send bot for auto turn
@@ -170,7 +163,9 @@ async function startUserBidTurn(
         playerGamePlay,
         tableData,
       });
-    } else {
+    }
+    else {
+
       await Scheduler.addJob.playerBidTurnTimer({
         timer: (tableData.userTurnTimer + NUMERICAL.ONE) * NUMERICAL.THOUSAND,
         jobId: `${tableId}:${tableData.currentRound}`,
@@ -207,11 +202,11 @@ async function startUserBidTurn(
     //     tableData,
     //   });
     // }
+
   } catch (error: any) {
-    logger.error(
-      tableId,
+    logger.error(tableId,
       `CATCH_ERROR : startUserBidTurn : tableId: ${tableId} :: userId: ${nextTurn} :: `,
-      error,
+      error
     );
     if (error instanceof Errors.CancelBattle) {
       await cancelBattle({
@@ -231,16 +226,17 @@ async function startUserBidTurn(
   } finally {
     await getLock.release(startUserBidTurnLock);
   }
-}
+};
+
 
 function checkSpadesCards(usersCards: Array<Array<string>>) {
-  const spade = 'S';
+  let spade = "S";
   let userCardsInSpadeExist = 0;
   for (let index = 0; index < usersCards.length; index++) {
     const cards = usersCards[index];
     for (let i = 0; i < cards.length; i++) {
-      const val = cards[i];
-      const isCard = val.includes(spade);
+      let val = cards[i]
+      let isCard = val.includes(spade);
       if (isCard) {
         userCardsInSpadeExist += 1;
         break;
@@ -256,11 +252,11 @@ function checkSpadesAndLowCards(usersCards: Array<Array<string>>) {
   for (let index = 0; index < usersCards.length; index++) {
     const cards = usersCards[index];
     for (let i = 0; i < cards.length; i++) {
-      const val = cards[i];
+      let val = cards[i];
 
       // Split the card into suit and rank
-      const [suit, rankStr] = val.split('-');
-      const rank = parseInt(rankStr);
+      let [suit, rankStr] = val.split("-");
+      let rank = parseInt(rankStr);
       // Check if the card is a spade or if the rank is less than or equal to 10
       if (rank && rank <= 10) {
         count += 1;

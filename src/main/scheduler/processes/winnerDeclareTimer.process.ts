@@ -1,6 +1,7 @@
+/* eslint-disable node/no-unsupported-features/es-syntax */
 import logger from '../../logger';
 import CommonEventEmitter from '../../commonEventEmitter';
-import {WINNER_DECLARE_TIMER} from '../../../constants/eventEmitter';
+import { WINNER_DECLARE_TIMER } from '../../../constants/eventEmitter';
 
 const winnerDeclareTimerProcess = async (job: any) => {
   try {

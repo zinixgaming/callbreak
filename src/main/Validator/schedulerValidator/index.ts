@@ -1,4 +1,4 @@
-import Joi from 'joi';
+const Joi = require('joi');
 import logger from '../../logger';
 import Errors from '../../errors';
 import {
@@ -30,8 +30,7 @@ async function initializeGameplaySchedulerValidator(
     Joi.assert(data, initializeGameplaySchedulerSchema);
     return data;
   } catch (error) {
-    logger.error(
-      data.tableId,
+    logger.error(data.tableId,
       'CATCH_ERROR : initializeGameplaySchedulerValidator :: ',
       error,
       '-',
@@ -48,8 +47,7 @@ async function roundStartTimerSchedulerValidator(
     Joi.assert(data, roundStartTimerSchedulerSchema);
     return data;
   } catch (error) {
-    logger.error(
-      data.tableId,
+    logger.error(data.tableId,
       'CATCH_ERROR : roundStartTimerSchedulerValidator :: ',
       error,
       '-',
@@ -66,8 +64,7 @@ async function initialBidTurnSetupTimerValidator(
     Joi.assert(data, initialBidTurnSetupTimerSchema);
     return data;
   } catch (error) {
-    logger.error(
-      data.tableData._id,
+    logger.error(data.tableData._id,
       'CATCH_ERROR : initialBidTurnSetupTimerValidator :: ',
       error,
       '-',
@@ -84,8 +81,7 @@ async function playerBidTurnTimerValidator(
     Joi.assert(data, playerBidTurnTimerSchema);
     return data;
   } catch (error) {
-    logger.error(
-      data.tableData._id,
+    logger.error(data.tableData._id,
       'CATCH_ERROR : playerBidTurnTimerValidator :: ',
       error,
       '-',
@@ -102,8 +98,7 @@ async function initialTurnSetupTimerValidator(
     Joi.assert(data, initialBidTurnSetupTimerSchema);
     return data;
   } catch (error) {
-    logger.error(
-      data.tableData._id,
+    logger.error(data.tableData._id,
       'CATCH_ERROR : initialTurnSetupTimerValidator :: ',
       error,
       '-',
@@ -120,8 +115,7 @@ async function winOfRoundSetupTimerValidator(
     Joi.assert(data, winOfRoundSetupTimerSchedulerSchema);
     return data;
   } catch (error) {
-    logger.error(
-      data.tableId,
+    logger.error(data.tableId,
       'CATCH_ERROR : winOfRoundSetupTimerValidator :: ',
       error,
       '-',
@@ -155,8 +149,7 @@ async function initialNewRoundStartTimerValidator(
     Joi.assert(data, initialNewRoundStartTimerSchedulerSchema);
     return data;
   } catch (error) {
-    logger.error(
-      data.tableId,
+    logger.error(data.tableId,
       'CATCH_ERROR : initialNewRoundStartTimerValidator :: ',
       error,
       '-',
@@ -173,8 +166,7 @@ async function playerTurnTimerValidator(
     Joi.assert(data, playerTurnTimerSchema);
     return data;
   } catch (error) {
-    logger.error(
-      data.tableData._id,
+    logger.error(data.tableData._id,
       'CATCH_ERROR : playerTurnTimerValidator :: ',
       error,
       '-',
@@ -189,13 +181,7 @@ async function findBotValidator(data: findBotIf): Promise<findBotIf> {
     Joi.assert(data, findBotSchema);
     return data;
   } catch (error) {
-    logger.error(
-      data.tableId,
-      'CATCH_ERROR : findBotValidator :: ',
-      error,
-      '-',
-      data,
-    );
+    logger.error(data.tableId, 'CATCH_ERROR : findBotValidator :: ', error, '-', data);
     throw new Errors.CancelBattle(error);
   }
 }
@@ -210,7 +196,7 @@ const exportObject = {
   winnerDeclareTimerValidator,
   initialNewRoundStartTimerValidator,
   playerTurnTimerValidator,
-  findBotValidator,
+  findBotValidator
 };
 
 export = exportObject;

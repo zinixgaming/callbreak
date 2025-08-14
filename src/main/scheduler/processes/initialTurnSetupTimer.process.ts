@@ -1,6 +1,7 @@
+/* eslint-disable node/no-unsupported-features/es-syntax */
 import logger from '../../logger';
 import CommonEventEmitter from '../../commonEventEmitter';
-import {INITIAL_TURN_SETUP_TIMER_EXPIRED} from '../../../constants/eventEmitter';
+import { INITIAL_TURN_SETUP_TIMER_EXPIRED } from '../../../constants/eventEmitter';
 
 const turnSetupTimerProcess = async (job: any) => {
   try {

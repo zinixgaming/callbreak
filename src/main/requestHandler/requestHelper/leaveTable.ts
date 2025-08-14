@@ -1,28 +1,22 @@
-import {leaveTable} from '../../play';
+import { leaveTable } from '../../play';
 import logger from '../../logger';
-import {PLAYER_STATE} from '../../../constants';
-import {leaveTableHelperRequestIf} from '../../interface/requestIf';
+import { PLAYER_STATE } from '../../../constants';
+import { leaveTableHelperRequestIf } from '../../interface/requestIf';
 import Validator from '../../Validator';
 
 async function leaveTableHandler(
-  {data: tableData}: leaveTableHelperRequestIf,
+  { data: tableData }: leaveTableHelperRequestIf,
   socket: any,
-  ack?: (response: any) => void,
+  ack?: Function,
 ) {
-  const {eventMetaData}: any = socket;
+  const { eventMetaData }: any = socket;
   try {
     tableData = await Validator.requestValidator.leaveTableValidator(tableData);
-    return leaveTable(
-      tableData.tableId,
-      PLAYER_STATE.LEFT,
-      socket,
-      ack,
-      true,
-      tableData.isLeaveFromScoreBoard,
-    ).catch((e: any) => logger.error(e));
+    return leaveTable(tableData.tableId, PLAYER_STATE.LEFT, socket, ack, true, tableData.isLeaveFromScoreBoard).catch(
+      (e: any) => logger.error(e),
+    );
   } catch (error) {
-    logger.error(
-      tableData.tableId,
+    logger.error(tableData.tableId, 
       `CATCH_ERROR : leaveTableHandler :: tableId: ${tableData.tableId} :: userId: ${eventMetaData.userId}`,
       tableData,
       error,

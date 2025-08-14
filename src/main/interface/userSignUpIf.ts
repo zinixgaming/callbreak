@@ -9,7 +9,7 @@ export interface userSignUpIf {
   startTime: number;
   balance: number;
   userId: string;
-  tableId: string;
+  tableId : string;
   profilePicture: string;
   totalRound: number;
   minPlayer: string;
@@ -22,11 +22,11 @@ export interface userSignUpIf {
   longitude: string;
   latitude: string;
   authToken: string;
-  isUseBot: boolean;
+  isUseBot : boolean;
   isBot: boolean;
-  inPlay?: boolean;
-  moneyMode: string;
-  isAnyRunningGame: boolean;
+  inPlay? : boolean;
+  moneyMode : string;
+  isAnyRunningGame : boolean;
 }
 
 export interface userIf {
@@ -40,7 +40,7 @@ export interface userIf {
   startTime: number;
   balance: number;
   userId: string;
-  tableId: string;
+  tableId : string;
   profilePicture: string;
   totalRound: number;
   minPlayer: string;
@@ -54,10 +54,10 @@ export interface userIf {
   longitude: string;
   latitude: string;
   socketId: string;
-  isUseBot: boolean;
+  isUseBot : boolean;
   isBot: boolean;
-  moneyMode: string;
-  isAnyRunningGame: boolean;
+  moneyMode : string;
+  isAnyRunningGame : boolean;
 }
 
 export interface getUserInDBIg {
@@ -77,6 +77,6 @@ export interface userGameDetail {
 }
 
 export interface blockUserCheckI {
-  tableId: string;
-  isNewTableCreated: boolean;
+  tableId : string
+  isNewTableCreated : boolean
 }

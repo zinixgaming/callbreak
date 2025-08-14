@@ -1,6 +1,7 @@
+/* eslint-disable node/no-unsupported-features/es-syntax */
 import logger from '../../../logger';
 import CommonEventEmitter from '../../../commonEventEmitter';
-import {TACK_BOT_TURN} from '../../../../constants/eventEmitter';
+import { TACK_BOT_TURN } from '../../../../constants/eventEmitter';
 
 const botTurnTimerProcess = async (job: any) => {
   try {

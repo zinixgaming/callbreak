@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+const crypto = require('crypto');
 import logger from '../logger';
 
 function decryptData(request: any) {

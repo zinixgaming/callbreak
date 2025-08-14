@@ -1,6 +1,7 @@
+/* eslint-disable node/no-unsupported-features/es-syntax */
 import logger from '../../logger';
 import CommonEventEmitter from '../../commonEventEmitter';
-import {PLAYER_BID_TURN_TIMER_EXPIRED} from '../../../constants/eventEmitter';
+import { PLAYER_BID_TURN_TIMER_EXPIRED } from '../../../constants/eventEmitter';
 
 const playerBidTurnTimerProcess = async (job: any) => {
   try {

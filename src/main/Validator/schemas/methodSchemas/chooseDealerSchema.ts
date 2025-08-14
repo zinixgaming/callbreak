@@ -1,6 +1,6 @@
 import seatsSchema from './seatsSchema';
 
-import Joi from 'joi';
+const Joi = require('joi');
 
 const chooseDealerSchema = Joi.object()
   .keys({

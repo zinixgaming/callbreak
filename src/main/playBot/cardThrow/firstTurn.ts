@@ -1,7 +1,7 @@
-import {CARD_SEQUENCE, NUMERICAL} from '../../../constants';
-import {playerPlayingDataIf} from '../../interface/playerPlayingTableIf';
+import { CARD_SEQUENCE, NUMERICAL } from '../../../constants';
+import { playerPlayingDataIf } from '../../interface/playerPlayingTableIf';
 import logger from '../../logger';
-import {getCardNumber} from '../../play/helpers/turn/cardThrow/utile';
+import { getCardNumber } from '../../play/helpers/turn/cardThrow/utile';
 
 // tack first for bot
 async function firstTurn(
@@ -9,7 +9,7 @@ async function firstTurn(
   userCards: string[],
 ): Promise<number> {
   let indexSequence: number = -1;
-  const {bid, currentCards} = playerGamePlay;
+  const { bid, currentCards } = playerGamePlay;
   //   const { bid, userId } = playerGamePlay;
   const getLowest: string[] = userCards.sort((Acard: string, Bcard: string) => {
     const aCard = getCardNumber(Acard);

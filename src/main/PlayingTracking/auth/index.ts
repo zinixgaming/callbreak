@@ -1,42 +1,32 @@
-import CryptoJS from 'crypto-js';
-import {getConfig} from '../../../config';
-
-const {SECRET_KEY} = getConfig();
-
-async function auth(authKey: string): Promise<{
-  status: number;
-  message: string;
-  data: string | null;
-}> {
-  try {
-    console.log('authKey :>> ', authKey, 'SECRET_KEY :: ', SECRET_KEY);
-
-    const bytes = CryptoJS.AES.decrypt(authKey, SECRET_KEY);
-    const gameId = bytes.toString(CryptoJS.enc.Utf8);
-
-    console.log('gameId ::>> ', gameId);
-
-    if (!gameId) {
-      return {
-        status: 400,
-        message: 'oops ! Something went wrong',
-        data: null,
-      };
+import jwt from 'jsonwebtoken'
+const CryptoJS = require("crypto-js");
+import { getConfig } from "../../../config";
+const { SECRET_KEY } = getConfig();
+async function auth(authKey: string):Promise<any> {
+    try {
+        console.log('authKey :>> ', authKey, "SECRET_KEY :: ", SECRET_KEY);
+        let bytes = CryptoJS.AES.decrypt(authKey, SECRET_KEY);
+        let gameId = bytes.toString(CryptoJS.enc.Utf8);
+        console.log('gameId ::>> ', gameId);
+      
+        if(!gameId) {
+            const resObj = {
+                status: 400,
+                message: "oops ! Something want wrong",
+                data: null
+            }
+            return resObj;
+        }else {
+            const resObj = {
+                status: 200,
+                message: "data fetched",
+                data: gameId
+            }
+            return resObj
+        }
+    } catch (error) {
+        console.log('auth :>> ', error);
     }
+};
 
-    return {
-      status: 200,
-      message: 'data fetched',
-      data: gameId,
-    };
-  } catch (error) {
-    console.error('auth :>> ', error);
-    return {
-      status: 500,
-      message: 'internal error',
-      data: null,
-    };
-  }
-}
-
-export = auth;
+export = auth

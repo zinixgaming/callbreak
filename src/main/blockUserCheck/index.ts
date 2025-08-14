@@ -1,6 +1,6 @@
 import blockUserCheck from './blockUserCheck';
 
 const exportObj = {
-  blockUserCheck,
+    blockUserCheck,
 };
 export = exportObj;

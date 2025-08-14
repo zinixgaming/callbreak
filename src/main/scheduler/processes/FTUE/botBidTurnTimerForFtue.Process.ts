@@ -1,6 +1,7 @@
+/* eslint-disable node/no-unsupported-features/es-syntax */
 import logger from '../../../logger';
 import CommonEventEmitter from '../../../commonEventEmitter';
-import {BOT_BID_TURN_TIMER_FOR_FTUE} from '../../../../constants/eventEmitter';
+import { BOT_BID_TURN_TIMER_FOR_FTUE } from '../../../../constants/eventEmitter';
 
 const botBidTurnTimerForFtueProcess = async (job: any) => {
   try {

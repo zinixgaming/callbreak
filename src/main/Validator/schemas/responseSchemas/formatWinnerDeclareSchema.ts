@@ -1,4 +1,4 @@
-import Joi from 'joi';
+const Joi = require('joi');
 
 const formatWinnerDeclareSchema = Joi.object().keys({
   timer: Joi.number().optional().description('turn timer'),
@@ -38,7 +38,9 @@ const formatWinnerDeclareSchema = Joi.object().keys({
               .required()
               .allow('')
               .description('user profile pic'),
-            userStatus: Joi.string().required().description('user status'),
+            userStatus : Joi.string()
+            .required()
+            .description('user status'),
           }),
         ),
         // roundScore: Joi.array().items(
@@ -76,14 +78,14 @@ const formatWinnerDeclareSchema = Joi.object().keys({
     Joi.object().keys({
       seatIndex: Joi.number().required().description('user seat index'),
       userId: Joi.string().required().description('userId'),
-      winningAmount: Joi.string().required().description('user winning Amount'),
-    }),
+      winningAmount: Joi.string().required().description('user winning Amount')
+    })
   ),
   winner: Joi.array()
     .items(Joi.number().optional())
     .optional()
     .description('user seat index'),
-  nextRound: Joi.number().required().description('next Round'),
+  nextRound : Joi.number().required().description('next Round')
 });
 
 export = formatWinnerDeclareSchema;

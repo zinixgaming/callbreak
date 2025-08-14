@@ -1,6 +1,7 @@
+/* eslint-disable node/no-unsupported-features/es-syntax */
 import logger from '../../logger';
 import CommonEventEmitter from '../../commonEventEmitter';
-import {START_NEW_ROUND_TIMER} from '../../../constants/eventEmitter';
+import { START_NEW_ROUND_TIMER } from '../../../constants/eventEmitter';
 
 const initialNewRoundStartTimerProcess = async (job: any) => {
   try {

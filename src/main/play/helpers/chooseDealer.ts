@@ -1,15 +1,15 @@
-import logger from '../../logger';
-import {userSeatsIf} from '../../interface/roundTableIf';
-import Validator from '../../Validator';
+import logger from "../../logger";
+import { userSeatsIf } from "../../interface/roundTableIf";
+import Validator from "../../Validator";
 /* select Game Dealer
  1st time select random then select clock wise
 */
 async function chooseDealer(
   seats: userSeatsIf,
   dealer: string,
-  isFTUE: boolean,
-): Promise<{dealerId: string; dealerIndex: number}> {
-  logger.info('chooseDealer : dealer :: ', dealer, ' : seats :: ', seats);
+  isFTUE: boolean
+): Promise<{ dealerId: string; dealerIndex: number }> {
+  logger.info("chooseDealer : dealer :: ", dealer, " : seats :: ", seats);
 
   try {
     await Validator.methodValidator.chooseDealerValidator(seats);
@@ -18,7 +18,7 @@ async function chooseDealer(
     if (!isFTUE) {
       if (dealer != null) {
         const dealerKey = Object.keys(seats).filter(
-          key => seats[key].userId === dealer,
+          (key) => seats[key].userId === dealer
         );
         randomIndex = seats[`${dealerKey[0]}`].seatIndex;
 
@@ -35,16 +35,16 @@ async function chooseDealer(
       randomIndex = 0;
     }
 
-    logger.info('chooseDealer : randomIndex :: ', randomIndex);
+    logger.info("chooseDealer : randomIndex :: ", randomIndex);
     const seat = seats[`s${randomIndex}`];
-    logger.info('chooseDealer : seat :: ', seat);
-    return {dealerId: seat.userId, dealerIndex: randomIndex};
+    logger.info("chooseDealer : seat :: ", seat);
+    return { dealerId: seat.userId, dealerIndex: randomIndex };
   } catch (error) {
-    console.log('CATCH_ERROR : chooseDealer :: dealer :', dealer);
+    console.log("CATCH_ERROR : chooseDealer :: dealer :", dealer);
     logger.error(
       `CATCH_ERROR : chooseDealer :: dealer : ${dealer} `,
       seats,
-      error,
+      error
     );
     throw error;
   }

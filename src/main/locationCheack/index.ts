@@ -1,6 +1,6 @@
 import locationDistanceCheck from './locationCheack';
 
 const exportObj = {
-  locationDistanceCheck,
+    locationDistanceCheck,
 };
 export = exportObj;

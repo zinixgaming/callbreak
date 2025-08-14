@@ -1,6 +1,6 @@
 import logger from '../../logger';
 import commonEventEmitter from '../../commonEventEmitter';
-import {WIN_OF_ROUND_TIMER} from '../../../constants/eventEmitter';
+import { WIN_OF_ROUND_TIMER } from '../../../constants/eventEmitter';
 
 const winOfRoundSetupTimerProcess = async (job: any) => {
   try {

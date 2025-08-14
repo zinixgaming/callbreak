@@ -1,5 +1,5 @@
 import logger from '../../logger';
-import {PREFIX} from '../../../constants/redis';
+import { PREFIX } from '../../../constants/redis';
 import REDIS from '../../redis';
 
 async function getUserByObjectId(tableId: string, userId: number) {

@@ -14,7 +14,7 @@ export interface signUpRequestIf {
   userName: string;
   lobbyId: string;
   isFTUE: boolean;
-  gameModeId: string;
+  gameModeId : string;
   gameId: string;
   totalRound: number;
   minPlayer: string;
@@ -27,8 +27,8 @@ export interface signUpRequestIf {
   profilePic: string;
   fromBack?: boolean;
   deviceId: string;
-  isAlredyPlaying?: boolean;
-  isAnyRunningGame?: boolean;
+  isAlredyPlaying? : boolean;
+  isAnyRunningGame? : boolean;
   latitude?: string;
   longitude?: string;
 }
@@ -43,7 +43,7 @@ export interface cardThrowRequestIf {
 
 export interface leaveTableRequestIf {
   tableId: string;
-  isLeaveFromScoreBoard: boolean;
+  isLeaveFromScoreBoard : boolean;
 }
 
 export interface userRejoinRequestIf {
@@ -87,6 +87,8 @@ export interface gameTableInfoReq {
   numberOfcard: number;
 }
 
+
+
 export interface gameTableInfoRequestIf {
   userId: string;
 }
@@ -94,3 +96,4 @@ export interface gameTableInfoRequestIf {
 export interface helpMenuRulsRequestIf {
   userId: string;
 }
+

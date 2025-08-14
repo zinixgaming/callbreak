@@ -1,6 +1,7 @@
 import createFlageSchema from './flageSchema';
 
 const exportObject = {
-  createFlageSchema,
+    createFlageSchema,
+
 };
 export = exportObject;

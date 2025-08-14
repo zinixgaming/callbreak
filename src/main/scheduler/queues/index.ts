@@ -25,6 +25,6 @@ const exportObject = {
   leaveTableTimer,
   rejoinTimer,
   ...FTUE,
-  ...BOT,
+  ...BOT
 };
 export = exportObject;

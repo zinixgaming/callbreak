@@ -1,4 +1,5 @@
 export = Object.freeze({
-  ID: 'BOT',
-  AUTH: 'botAuth',
-});
+    ID:"BOT",
+    AUTH:"botAuth"
+  });
+  

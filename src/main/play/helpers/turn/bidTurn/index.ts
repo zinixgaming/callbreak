@@ -6,39 +6,29 @@ import {
   setRoundTableData,
   getTableData,
 } from '../../../../gameTable/utils';
-import {
-  ERROR_TYPE,
-  EVENTS,
-  MESSAGES,
-  NUMERICAL,
-  TABLE_STATE,
-} from '../../../../../constants';
+import { ERROR_TYPE, EVENTS, MESSAGES, NUMERICAL, TABLE_STATE } from '../../../../../constants';
 import CommonEventEmitter from '../../../../commonEventEmitter';
 import Scheduler from '../../../../scheduler';
 import changeTurn from './changeTurn';
-import {playerPlayingDataIf} from '../../../../interface/playerPlayingTableIf';
-import {roundTableIf} from '../../../../interface/roundTableIf';
-import {playingTableIf} from '../../../../interface/playingTableIf';
+import { playerPlayingDataIf } from '../../../../interface/playerPlayingTableIf';
+import { roundTableIf } from '../../../../interface/roundTableIf';
+import { playingTableIf } from '../../../../interface/playingTableIf';
 import socketAck from '../../../../../socketAck';
-import {throwErrorIF} from '../../../../interface/throwError';
+import { throwErrorIF } from '../../../../interface/throwError';
 import cancelBattle from '../../../cancelBattle';
 import Errors from '../../../../errors';
-import {setBidRequestIf} from '../../../../interface/requestIf';
-import {formatUserBidShow} from '../../playHelper';
+import { setBidRequestIf } from '../../../../interface/requestIf';
+import { formatUserBidShow } from '../../playHelper';
 
 // Player Set Bid Volume
-async function setBid(
-  data: setBidRequestIf,
-  socket: any,
-  ack?: (response: any) => void,
-) {
-  const {bid} = data;
-  const {tableId, userId} = socket.eventMetaData;
-  const {getLock} = global;
+async function setBid(data: setBidRequestIf, socket: any, ack?: Function) {
+  const { bid } = data;
+  const { tableId, userId } = socket.eventMetaData;
+  const { getLock } = global;
   const setBidLock = await getLock.acquire([tableId], 2000);
   try {
     const playingTable: playingTableIf = await getTableData(tableId);
-    const {currentRound} = playingTable;
+    const { currentRound } = playingTable;
 
     const promises = await Promise.all([
       getPlayerGamePlay(userId, tableId),
@@ -51,7 +41,7 @@ async function setBid(
     if (playerObj.bidTurn) {
       const errorObj: throwErrorIF = {
         type: ERROR_TYPE.USER_BID_ERROR,
-        message: 'You have already select bid',
+        message: "You have already select bid",
         isToastPopup: true,
       };
       throw errorObj;
@@ -59,6 +49,7 @@ async function setBid(
 
     playerObj.bid = bid;
     playerObj.bidTurn = true;
+
 
     await Promise.all([
       setPlayerGamePlay(userId, tableId, playerObj),
@@ -94,11 +85,12 @@ async function setBid(
     /* check all bid done */
     const playerSeats = roundObj.seats;
     const playerGamePlaydata = await Promise.all(
-      Object.keys(playerSeats).map(async ele =>
-        getPlayerGamePlay(playerSeats[ele].userId, tableId),
-      ),
+      Object.keys(playerSeats).map(async (ele) =>
+        getPlayerGamePlay(playerSeats[ele].userId, tableId)
+      )
     );
     logger.info(tableId, 'setBid : playerGamePlaydata ', playerGamePlaydata);
+
 
     const bidTurnComplete = playerGamePlaydata.every(player => player.bidTurn);
     logger.info(tableId, 'setBid : bidTurnComplete ', bidTurnComplete);
@@ -108,15 +100,14 @@ async function setBid(
     logger.info(tableId, ' setBid : nextTurn : ==>>', nextTurn);
 
     if (bidTurnComplete) {
-      await Scheduler.cancelJob.playerBidTurnTimerCancel(
-        `${tableId}:${currentRound}`,
-      );
+
+      await Scheduler.cancelJob.playerBidTurnTimerCancel(`${tableId}:${currentRound}`);
 
       roundObj.lastInitiater = nextTurn;
       roundObj.tableState = TABLE_STATE.ROUND_STARTED;
       const nextTurnPlayerData: playerPlayingDataIf = await getPlayerGamePlay(
         nextTurn,
-        tableId,
+        tableId
       );
       nextTurnPlayerData.isTurn = true;
       await setPlayerGamePlay(nextTurn, tableId, nextTurnPlayerData);
@@ -130,14 +121,14 @@ async function setBid(
         playerGamePlayData: playerGamePlaydata,
         nextTurn,
       });
+
     }
 
     // Change Player Bid Turn
     // changeTurn(tableId.toString());
   } catch (error: any) {
     logger.error(
-      tableId,
-      `CATCH_ERROR : setBid Error : tableId: ${tableId} :: userId: ${userId} :: bid: ${bid} :: `,
+      tableId, `CATCH_ERROR : setBid Error : tableId: ${tableId} :: userId: ${userId} :: bid: ${bid} :: `,
       error,
     );
 

@@ -1,17 +1,17 @@
 import socketAck from '../../../socketAck';
-import {EVENTS, FTUE_STEP, NUMERICAL} from '../../../constants';
+import { EVENTS, FTUE_STEP, NUMERICAL } from '../../../constants';
 import logger from '../../logger';
-import {startBidTurn, startManuallyTurn} from '../../FTUE/play';
+import { startBidTurn, startManuallyTurn } from '../../FTUE/play';
 import Scheduler from '../../scheduler';
 
 async function ftueChangeStep(data: any, socket: any, ack: any) {
-  const {step} = data.data;
-  const {tableId, currentRound} = socket.eventMetaData;
+  const { step } = data.data;
+  const { tableId, currentRound } = socket.eventMetaData;
   logger.info(tableId, 'ftueChangeStep : data ::', data.data);
-  logger.info(tableId, 'ftueChangeStep : data ::', step);
-  logger.info(tableId, 'ftueChangeStep : data ::', typeof step);
-  logger.info(tableId, 'ftueChangeStep : data ::', NUMERICAL.SEVEN);
-  logger.info(tableId, 'ftueChangeStep : data ::', typeof NUMERICAL.SEVEN);
+  logger.info(tableId,'ftueChangeStep : data ::', step);
+  logger.info(tableId,'ftueChangeStep : data ::', typeof step);
+  logger.info(tableId,'ftueChangeStep : data ::', NUMERICAL.SEVEN);
+  logger.info(tableId,'ftueChangeStep : data ::', typeof NUMERICAL.SEVEN);
 
   switch (step) {
     case FTUE_STEP.START_BID_TURN:
@@ -34,11 +34,11 @@ async function ftueChangeStep(data: any, socket: any, ack: any) {
       break;
 
     default:
-      logger.info(tableId, 'ftueChangeStep call in switch :: default');
+      logger.info(tableId,'ftueChangeStep call in switch :: default');
       break;
   }
 
-  logger.info(tableId, 'ftueMessage :: response :', data);
+  logger.info(tableId,'ftueMessage :: response :', data);
   socketAck.ackMid(
     EVENTS.FTUE_CHANGE_STEP_SOCKET_EVENT,
     data,

@@ -1,6 +1,6 @@
-import {setTurnHistory} from '../../gameTable/utils';
-import {roundTableIf} from '../../interface/roundTableIf';
-import {roundDetailsInterface} from '../../interface/turnHistoryIf';
+import { setTurnHistory } from '../../gameTable/utils';
+import { roundTableIf } from '../../interface/roundTableIf';
+import { roundDetailsInterface } from '../../interface/turnHistoryIf';
 
 async function addTurnHistory(tableId: string, roundTable: roundTableIf) {
   try {
@@ -10,7 +10,7 @@ async function addTurnHistory(tableId: string, roundTable: roundTableIf) {
       roundNo: roundTable.currentRound,
       roundId: roundTable._id,
       winnerId: [],
-      winnerSI: [],
+      winnerSI : [],
       createdOn: currentTime.toString(),
       modifiedOn: currentTime.toString(),
       extra_info: '',
@@ -24,9 +24,6 @@ async function addTurnHistory(tableId: string, roundTable: roundTableIf) {
       defaultRoundHistory,
     );
     return turnHistory;
-  } catch (e) {
-    // Handle error silently
-    return null;
-  }
+  } catch (e) {}
 }
 export = addTurnHistory;

@@ -1,14 +1,16 @@
-import logger from '../logger';
-import {EMPTY, EVENTS, MESSAGES, NUMERICAL} from '../../constants';
-import DefaultDataGenerator from '../defaultData';
-import {insertNewPlayer} from '../gameTable';
-import {userSignUpIf, userIf} from '../interface/userSignUpIf';
-import socketAck from '../../socketAck';
-import {setUser, getUser} from '../gameTable/utils';
-import {checkBalance, getUserOwnProfile} from '../clientsideapi';
-import CommonEventEmitter from '../commonEventEmitter';
-import Errors from '../errors';
-import userProfileUpdate from './userProfileUpdate';
+/* eslint-disable node/no-unsupported-features/es-syntax */
+import logger from "../logger";
+import { EMPTY, EVENTS, MESSAGES, NUMERICAL } from "../../constants";
+import DefaultDataGenerator from "../defaultData";
+import { insertNewPlayer } from "../gameTable";
+import { userSignUpIf, userIf } from "../interface/userSignUpIf";
+import socketAck from "../../socketAck";
+import { setUser, getUser } from "../gameTable/utils";
+import { checkBalance, getUserOwnProfile } from '../clientsideapi'
+import CommonEventEmitter from "../commonEventEmitter";
+import Errors from "../errors";
+import userProfileUpdate from "./userProfileUpdate";
+
 
 const setDataForUpdate = (signUpData: userIf) => {
   console.log(signUpData.userId, 'signUpData.tableid :>> ', signUpData.tableId);
@@ -23,8 +25,8 @@ const setDataForUpdate = (signUpData: userIf) => {
     gameId: signUpData.gameId,
     startTime: signUpData.startTime,
     balance: signUpData.balance,
-    userId: signUpData.userId,
-    tableId: signUpData.tableId ? signUpData.tableId : EMPTY,
+    userId:  signUpData.userId,
+    tableId: (signUpData.tableId) ? signUpData.tableId : EMPTY,
     profilePicture: signUpData.profilePicture,
     totalRound: signUpData.totalRound,
     minPlayer: signUpData.minPlayer,
@@ -41,7 +43,7 @@ const setDataForUpdate = (signUpData: userIf) => {
     isUseBot: signUpData.isUseBot,
     isBot: signUpData.isBot,
     moneyMode: signUpData.moneyMode,
-    isAnyRunningGame: signUpData.isAnyRunningGame,
+    isAnyRunningGame : signUpData.isAnyRunningGame,
     createdAt: currentTimestamp,
     updatedAt: currentTimestamp,
   };
@@ -50,61 +52,48 @@ const setDataForUpdate = (signUpData: userIf) => {
 };
 
 async function findOrCreateUser(signUpData: userIf) {
-  const {userId} = signUpData;
+  const { userId } = signUpData;
   // const keyForUser = `${PREFIX.USER}:${userId}`;
   let userInfo = await getUser(userId);
 
-  logger.info(userId, 'findOrCreateUser : userInfo :: ', userInfo);
+  logger.info(userId, "findOrCreateUser : userInfo :: ", userInfo);
   if (userInfo) {
     signUpData._id = userInfo._id;
     signUpData.tableId = userInfo.tableId;
-    logger.info(
-      userId,
-      'findOrCreateUser : userInfo is avalible :: ',
-      userInfo,
-    );
+    logger.info(userId, "findOrCreateUser : userInfo is avalible :: ", userInfo);
     // updating the user info
 
     const userProfileUpdateQuery: userIf = setDataForUpdate(signUpData);
 
-    logger.info(
-      userId,
-      'findOrCreateUser : userProfileUpdateQuery ::',
-      userProfileUpdateQuery,
+    logger.info(userId,
+      "findOrCreateUser : userProfileUpdateQuery ::",
+      userProfileUpdateQuery
     );
     // update user info
     await setUser(userId, userProfileUpdateQuery);
   } else {
-    logger.info(userId, 'findOrCreateUser : create data :: ');
+    logger.info(userId, "findOrCreateUser : create data :: ");
 
     // create new user
     const userDefaultData: userIf =
       DefaultDataGenerator.defaultUserData(signUpData);
 
-    logger.info(
-      userId,
-      'findOrCreateUser : userDefaultData :: ',
-      userDefaultData,
-    );
+    logger.info(userId, "findOrCreateUser : userDefaultData :: ", userDefaultData);
     // add user info
     await setUser(userId, userDefaultData);
     userInfo = await getUser(userId);
-    logger.info(userId, 'findOrCreateUser : Create USer :: ', userInfo);
+    logger.info(userId, "findOrCreateUser : Create USer :: ", userInfo);
   }
 
   return userInfo;
 }
 
-async function userSignUp(
-  data: userSignUpIf,
-  socket: any,
-  ack?: (response: any) => void,
-) {
-  const {getLock} = global;
+async function userSignUp(data: userSignUpIf, socket: any, ack?: Function) {
+  const { getLock } = global;
   const signUpLock = await getLock.acquire([data.userId], 2000);
-  const {userId} = data;
+  const { userId } = data;
   try {
-    const signUpData = {...data, socketId: socket.id};
+    const signUpData = { ...data, socketId: socket.id };
     logger.info(userId, 'signUpData  =:>> ', signUpData);
 
     const userData: userIf = await findOrCreateUser(signUpData);
@@ -119,32 +108,23 @@ async function userSignUp(
     let userDetail = <userIf>{};
     let updatedUserDetail;
     if (userData) {
-      userDetail = await getUser(userData.userId);
-      logger.info(userId, 'userDetail :: >> ', userDetail);
 
+      userDetail = await getUser(userData.userId);
+      logger.info(userId, "userDetail :: >> ", userDetail);
+      
       //update user profile details userId
       await userProfileUpdate(userDetail, userData.socketId);
       updatedUserDetail = await getUser(userData.userId);
 
       if (userDetail && userDetail.tableId === EMPTY) {
+        
         //check user balance
         let checkBalanceDetail: any = {};
-        checkBalanceDetail = await checkBalance(
-          {tournamentId: userDetail.lobbyId},
-          userDetail.authToken,
-          userData.socketId,
-          userDetail.userId,
-        );
-        logger.info(userId, 'checkBalanceDetail  :: >> ', checkBalanceDetail);
-        if (
-          checkBalanceDetail &&
-          checkBalanceDetail.userBalance.isInsufficiantBalance
-        ) {
-          console.log(
-            'isInsufficiantBalance ::',
-            checkBalanceDetail.userBalance.isInsufficiantBalance,
-          );
-          const nonProdMsg = 'Insufficient Balance!';
+        checkBalanceDetail = await checkBalance({ tournamentId: userDetail.lobbyId }, userDetail.authToken, userData.socketId, userDetail.userId);
+        logger.info( userId, "checkBalanceDetail  :: >> ", checkBalanceDetail);
+        if (checkBalanceDetail && checkBalanceDetail.userBalance.isInsufficiantBalance) {
+          console.log("isInsufficiantBalance ::", checkBalanceDetail.userBalance.isInsufficiantBalance);
+          let nonProdMsg = "Insufficient Balance!";
           CommonEventEmitter.emit(EVENTS.SHOW_POPUP, {
             socket,
             data: {
@@ -158,25 +138,23 @@ async function userSignUp(
               button_methods: [MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.EXIT],
             },
           });
-        } else if (
-          checkBalanceDetail &&
-          checkBalanceDetail.userBalance.isInsufficiantBalance === false
-        ) {
+        }
+        else if (checkBalanceDetail && checkBalanceDetail.userBalance.isInsufficiantBalance === false) {
           insertNewPlayer(updatedUserDetail, socket, ack);
-        } else {
+        }
+        else {
           throw new Errors.UnknownError('Unable to check Balance data');
         }
-      } else {
-        logger.info(
-          userId,
-          'rejoin user insert in table :::> updatedUserDetail ::  tableId: ',
-          updatedUserDetail.tableId,
-        );
+
+      }
+      else {
+        logger.info( userId, 'rejoin user insert in table :::> updatedUserDetail ::  tableId: ', updatedUserDetail.tableId);
         insertNewPlayer(updatedUserDetail, socket, ack);
       }
+
     }
   } catch (error) {
-    logger.error(userId, 'CATCH_ERROR :userSignUp :: ', data, error);
+    logger.error( userId, "CATCH_ERROR :userSignUp :: ", data, error);
 
     socketAck.ackMid(
       EVENTS.SIGN_UP_SOCKET_EVENT,
@@ -189,8 +167,8 @@ async function userSignUp(
       },
       // socket.metrics,
       socket.userId,
-      '',
-      ack,
+      "",
+      ack
     );
   } finally {
     await getLock.release(signUpLock);

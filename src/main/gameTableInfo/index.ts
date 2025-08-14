@@ -1,32 +1,35 @@
-import logger from '../logger';
-import Errors from '../errors';
-import {setUser, getUser} from '../gameTable/utils';
-import {EVENTS, NUMERICAL} from '../../constants';
+import logger from "../logger";
+import Errors from "../errors";
+import { setUser, getUser } from "../gameTable/utils";
+import {
+  EVENTS,
+  NUMERICAL,
+} from "../../constants";
 import socketAck from '../../socketAck';
-import {gameTableInfoRequestIf} from '../interface/requestIf';
-import {userIf} from '../interface/userSignUpIf';
-import Validator from '../Validator';
+import { gameTableInfoRequestIf } from "../interface/requestIf";
+import {userIf} from '../interface/userSignUpIf'
+import Validator from '../Validator'
 
 async function gameTableInfo(
   data: gameTableInfoRequestIf,
   socket: any,
-  ack?: (response: any) => void,
+  ack?: Function
 ) {
-  const {tableId} = socket.eventMetaData;
+  const { tableId } = socket.eventMetaData;
   try {
-    logger.debug(tableId, 'gameTableInfo :: ', data);
-    const {userId} = data;
-
-    const getUserDetail: userIf = await getUser(userId);
-    logger.info(tableId, 'gameTableInfo : getUserDetail :: ', getUserDetail);
+    logger.debug(tableId, "gameTableInfo :: ", data)
+    const { userId } = data;
+    
+    const getUserDetail : userIf = await getUser(userId);
+    logger.info(tableId, "gameTableInfo : getUserDetail :: ", getUserDetail)
     const gameTableInfoData = {
-      entryFee: getUserDetail.entryFee,
-      rake: getUserDetail.rake,
-      nmberOfRounds: getUserDetail.totalRound,
-      numberOfPlayer: getUserDetail.noOfPlayer,
-      numberOfCard: NUMERICAL.THIRTEEN,
+        entryFee : getUserDetail.entryFee,
+        rake: getUserDetail.rake,
+        nmberOfRounds: getUserDetail.totalRound,
+        numberOfPlayer: getUserDetail.noOfPlayer,
+        numberOfCard: NUMERICAL.THIRTEEN
     };
-    logger.info(tableId, 'data : gameTableInfoData :: ', gameTableInfoData);
+    logger.info(tableId, "data : gameTableInfoData :: ", gameTableInfoData);
 
     // const formatGti = await Validator.responseValidator.formatGtiValidator(gameTableInfoData)
     if (ack) {
@@ -42,9 +45,10 @@ async function gameTableInfo(
         ack,
       );
     }
+
   } catch (error) {
-    logger.error(tableId, 'CATCH_ERROR : gameTableInfo :: ', data, '-', error);
+    logger.error(tableId, "CATCH_ERROR : gameTableInfo :: ", data, "-", error);
   }
 }
 
-export = gameTableInfo;
+export = gameTableInfo

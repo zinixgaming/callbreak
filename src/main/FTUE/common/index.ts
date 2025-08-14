@@ -1,13 +1,11 @@
-import {randomInt} from 'crypto';
+import { NUMERICAL } from '../../../constants';
 import logger from '../../logger';
-import {NUMERICAL} from '../../../constants';
 
-const getRandomNumber = (min: number, max: number): number => {
-  return randomInt(min, max + 1); // max is exclusive, so +1
-};
+const getRandomNumber = (min: number, max: number) =>
+  Math.floor(Math.random() * (max - min) + min);
 
 const userThrowCardTips = (currentCards: string[], turnCount: number) => {
-  const sendObject = {
+  let sendObject = {
     card: '',
     throwCardIndex: -1,
   };

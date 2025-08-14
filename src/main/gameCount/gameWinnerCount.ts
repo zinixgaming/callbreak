@@ -1,7 +1,7 @@
 import logger from '../logger';
 import Errors from '../errors';
 import DB from '../db';
-import {MONGO, NUMERICAL} from '../../constants';
+import { MONGO, NUMERICAL } from '../../constants';
 
 async function gameWinnerCount(csid: string) {
   logger.debug('gameWinnerCount ::', csid);

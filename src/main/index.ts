@@ -1,4 +1,4 @@
-import './commonEventHandlers/socket';
+require('./commonEventHandlers/socket');
 
 import Redis from './redis';
 import logger from './logger';

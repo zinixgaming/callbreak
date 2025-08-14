@@ -1,4 +1,4 @@
-import Joi from 'joi';
+const Joi = require('joi');
 
 const formatUserThrowCardShowSchema = Joi.object().keys({
   seatIndex: Joi.number().integer().required().description('user Seat Index'),

@@ -16,45 +16,44 @@ import {
 import Scheduler from '../../../scheduler';
 import CommonEventEmitter from '../../../commonEventEmitter';
 import scoreOfRound from '../scoreOfRound';
-import {playerPlayingDataIf} from '../../../interface/playerPlayingTableIf';
-import {playingTableIf} from '../../../interface/playingTableIf';
-import {roundTableIf} from '../../../interface/roundTableIf';
+import { playerPlayingDataIf } from '../../../interface/playerPlayingTableIf';
+import { playingTableIf } from '../../../interface/playingTableIf';
+import { roundTableIf } from '../../../interface/roundTableIf';
 import cancelBattle from '../../cancelBattle';
 import Errors from '../../../errors';
 import Validator from '../../../Validator';
-import {winnerDeclareTimerIf} from '../../../interface/schedulerIf';
+import { winnerDeclareTimerIf } from '../../../interface/schedulerIf';
 
 const winOfRound = async (tableId: string) => {
   logger.info(tableId, 'winOfRound : started with tableId : ', tableId);
-  const {getLock} = global;
+  const { getLock } = global;
   const winOfRoundLock = await getLock.acquire([tableId], 2000);
   try {
     const playTable: playingTableIf = await getTableData(tableId);
-    const {currentRound, isFTUE} = playTable;
+    const { currentRound, isFTUE } = playTable;
     const tableGamePlay: roundTableIf = await getRoundTableData(
       tableId,
       currentRound,
     );
     const playersGameData: playerPlayingDataIf[] = await Promise.all(
-      Object.keys(tableGamePlay.seats).map(async ele =>
+      Object.keys(tableGamePlay.seats).map(async (ele) =>
         getPlayerGamePlay(tableGamePlay.seats[ele].userId, tableId),
       ),
     );
 
-    logger.info(
-      tableId,
+    logger.info(tableId, 
       'winOfRound : changeThrowCardTurn : playersGameData :: ',
       playersGameData,
       ' : winOfRound : tableGamePlaytableGamePlay :: ',
       tableGamePlay,
     );
 
-    const {winSeatIndex}: any = await checkWinnerOfRound(tableGamePlay);
+    const { winSeatIndex }: any = await checkWinnerOfRound(tableGamePlay);
     tableGamePlay.turnCurrentCards = ['U-0', 'U-0', 'U-0', 'U-0'];
     const seat = tableGamePlay.seats;
     tableGamePlay.turnCardSequence = CARD_SEQUENCE.CARD_NONE;
     const index: any = Object.keys(seat).find(
-      key => seat[key].seatIndex === winSeatIndex,
+      (key) => seat[key].seatIndex === winSeatIndex,
     );
     const winId = seat[index].userId;
     tableGamePlay.lastInitiater = winId;
@@ -81,11 +80,7 @@ const winOfRound = async (tableId: string) => {
       // set THIRTEEN
       playerGamePlay.isTurn = true;
       await setPlayerGamePlay(winId, tableId, playerGamePlay);
-      logger.info(
-        tableId,
-        'WIN_OF_ROUND ::  turn complete.',
-        tableGamePlay.turnCount,
-      );
+      logger.info(tableId, 'WIN_OF_ROUND ::  turn complete.', tableGamePlay.turnCount);
 
       // False only if isFTUE false or turnCount is not equal to 12
       if (!isFTUE || tableGamePlay.turnCount !== NUMERICAL.TWELVE) {
@@ -105,11 +100,7 @@ const winOfRound = async (tableId: string) => {
       });
     }
   } catch (e) {
-    logger.error(
-      tableId,
-      `CATCH_ERROR : winOfRound : tableId: ${tableId} error ::`,
-      e,
-    );
+    logger.error(tableId, `CATCH_ERROR : winOfRound : tableId: ${tableId} error ::`, e);
     if (e instanceof Errors.CancelBattle) {
       await cancelBattle({
         tableId,
@@ -124,10 +115,9 @@ const winOfRound = async (tableId: string) => {
 
 async function checkWinnerOfRound(roundGameData: roundTableIf) {
   try {
-    roundGameData =
-      await Validator.methodValidator.checkWinnerOfRoundValidator(
-        roundGameData,
-      );
+    roundGameData = await Validator.methodValidator.checkWinnerOfRoundValidator(
+      roundGameData,
+    );
     const seat = roundGameData.seats;
     const userId = roundGameData.lastInitiater;
     const userSeatString: string | undefined = Object.keys(seat).find(
@@ -143,7 +133,7 @@ async function checkWinnerOfRound(roundGameData: roundTableIf) {
     const round_Card = roundGameData.turnCurrentCards;
     let copy_Round_Card = roundGameData.turnCurrentCards;
     const turnCardSequence = roundGameData.turnCardSequence;
-    const temp_Card: string[] = [];
+    let temp_Card: string[] = [];
     let win = -NUMERICAL.ONE;
 
     logger.info(
@@ -191,7 +181,7 @@ async function checkWinnerOfRound(roundGameData: roundTableIf) {
       win = -NUMERICAL.ONE;
 
       for (let index = NUMERICAL.ZERO; index <= NUMERICAL.THREE; index++) {
-        const currentCardSequence = copy_Round_Card[index].charAt(0);
+        let currentCardSequence = copy_Round_Card[index].charAt(0);
         if (
           currentCardSequence === turnCardSequence ||
           currentCardSequence === breakingSpades

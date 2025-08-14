@@ -3,7 +3,7 @@ import methodSchemas from './methodSchemas';
 import responseSchemas from './responseSchemas';
 import schedulerSchemas from './schedulerSchemas';
 import lobbySchemas from './lobbySchemas';
-import playingTrackingSchemas from './playingTrackingSchema';
+import playingTrackingSchemas from './playingTrackingSchema'
 
 const exportObject = {
   requestSchemas,
@@ -11,7 +11,7 @@ const exportObject = {
   responseSchemas,
   schedulerSchemas,
   lobbySchemas,
-  playingTrackingSchemas,
+  playingTrackingSchemas
 };
 
 export = exportObject;

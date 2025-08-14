@@ -1,19 +1,25 @@
-import logger from '../../logger';
-import {EVENTS, MESSAGES, NUMERICAL, PLAYER_STATE} from '../../../constants';
+import logger from "../../logger";
+import {
+  EVENTS,
+  MESSAGES,
+  NUMERICAL,
+  PLAYER_STATE,
+} from "../../../constants";
 import {
   getPlayerGamePlay,
   getRoundTableData,
   getTableData,
-} from '../../gameTable/utils';
-import CommonEventEmitter from '../../commonEventEmitter';
-import {playingTableIf} from '../../interface/playingTableIf';
-import leaveTable from '../leaveTable';
-import _ from 'underscore';
+} from "../../gameTable/utils";
+import CommonEventEmitter from "../../commonEventEmitter";
+import { playingTableIf } from "../../interface/playingTableIf";
+import leaveTable from "../leaveTable";
+const _ = require('underscore');
+
 
 async function cancelBattleAckToClient(
   errMsg: string,
   tableData: playingTableIf,
-  userProfiles: any, //userIf[],
+  userProfiles: any //userIf[],
 ) {
   for (let i = 0; i < userProfiles.length; i++) {
     const userProfile = userProfiles[i];
@@ -27,13 +33,7 @@ async function cancelBattleAckToClient(
           userId: userProfile.userId,
         },
       };
-      await leaveTable(
-        tableData._id,
-        PLAYER_STATE.LEFT,
-        socketObj,
-        undefined,
-        false,
-      );
+      await leaveTable(tableData._id, PLAYER_STATE.LEFT, socketObj, undefined, false);
       // leaveTable(tableData._id, PLAYER_STATE.LEFT, socketObj, undefined);
 
       // Player miss number of turn then defind in Auto Turn
@@ -45,7 +45,7 @@ async function cancelBattleAckToClient(
       //   socketObj,
       // });
 
-      const nonProdMsg = errMsg;
+      let nonProdMsg = errMsg;
       CommonEventEmitter.emit(EVENTS.SHOW_POPUP, {
         socket: userProfile.socketId,
         data: {
@@ -64,35 +64,28 @@ async function cancelBattleAckToClient(
 }
 
 async function cancelBattle(cancelBattleInput: any) {
-  const {tableId, errorMessage} = cancelBattleInput;
+  const { tableId, errorMessage } = cancelBattleInput;
   try {
-    const {getConfigData} = global;
+    const { getConfigData } = global;
+
 
     const tableConfig = await getTableData(tableId);
-    logger.info(
-      tableId,
+    logger.info(tableId,
       tableConfig,
-      '  tableConfig data for table to cancelBattle :-',
-      tableId,
+      "  tableConfig data for table to cancelBattle :-",
+      tableId
     );
-    console.log(
-      '===============================================================',
-    );
-    console.log(
-      '======================= cancelBattle =========================',
-    );
-    console.log(
-      '===============================================================',
-    );
+    console.log('===============================================================');
+    console.log('======================= cancelBattle =========================');
+    console.log('===============================================================');
 
-    const {currentRound, lobbyId} = tableConfig;
+    const { currentRound, lobbyId } = tableConfig;
 
     const roundTableData = await getRoundTableData(tableId, currentRound);
-    logger.debug(
-      tableId,
+    logger.debug(tableId,
       roundTableData,
-      '  roundTableData data for table to cancelBattle:-',
-      tableId,
+      "  roundTableData data for table to cancelBattle:-",
+      tableId
     );
 
     const playingUsers = roundTableData.seats;
@@ -103,28 +96,26 @@ async function cancelBattle(cancelBattleInput: any) {
     const userProfiles = await Promise.all(
       userIds.map((userId: string) => {
         return getPlayerGamePlay(userId, tableId);
-      }),
+      })
     );
 
-    logger.debug(tableId, userProfiles, '  userProfiles for table : ', tableId);
+    logger.debug(tableId, userProfiles, "  userProfiles for table : ", tableId);
 
     // send event to client
     await cancelBattleAckToClient(
-      getConfigData.GSSP ? getConfigData.GSSP : 'cancel Battle',
+      getConfigData.GSSP ? getConfigData.GSSP : "cancel Battle",
       tableConfig,
-      userProfiles,
+      userProfiles
     );
 
     return true;
   } catch (error) {
-    logger.error(
-      tableId,
-      `CATCH_ERROR : Found error at cancelBattle : table - ${
-        cancelBattleInput && cancelBattleInput.tableId
-          ? cancelBattleInput.tableId
-          : ''
+    logger.error(tableId,
+      `CATCH_ERROR : Found error at cancelBattle : table - ${cancelBattleInput && cancelBattleInput.tableId
+        ? cancelBattleInput.tableId
+        : ""
       }`,
-      error,
+      error
     );
     return false;
   }

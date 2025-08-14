@@ -1,7 +1,7 @@
 export interface defaultRoundTableIf {
   tableId: string;
   noOfPlayer: string;
-  currantRound: number;
+  currantRound : number;
 }
 
 export interface roundTableIf {

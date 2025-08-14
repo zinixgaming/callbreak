@@ -1,19 +1,19 @@
-import {ObjectId} from 'mongodb';
-import {EMPTY, NUMERICAL, PLAYER_STATE, TABLE_STATE} from '../../constants';
-import {userIf, userSignUpIf} from '../interface/userSignUpIf';
-import {defaultPlayingTableIf} from '../interface/playingTableIf';
-import {defaultRoundTableIf, userSeatsIf} from '../interface/roundTableIf';
+const { ObjectID } = require("mongodb");
+import { EMPTY, NUMERICAL, PLAYER_STATE, TABLE_STATE } from "../../constants";
+import { userIf, userSignUpIf } from "../interface/userSignUpIf";
+import { defaultPlayingTableIf } from "../interface/playingTableIf";
+import { defaultRoundTableIf, userSeatsIf } from "../interface/roundTableIf";
 import {
   defaultPlayerTableIf,
   playerPlayingDataIf,
-} from '../interface/playerPlayingTableIf';
+} from "../interface/playerPlayingTableIf";
 
 function defaultUserData(signUpData: userIf) {
   // generates the user default fields for the game
   const currentTimestamp = new Date();
 
   const data = {
-    _id: new ObjectId().toString(),
+    _id: ObjectID().toString(),
     isFTUE: signUpData.isFTUE,
     username: signUpData.username,
     deviceId: signUpData.deviceId,
@@ -22,7 +22,7 @@ function defaultUserData(signUpData: userIf) {
     startTime: signUpData.startTime,
     balance: signUpData.balance,
     userId: signUpData.userId,
-    tableId: EMPTY,
+    tableId : EMPTY,
     profilePicture: signUpData.profilePicture,
     totalRound: signUpData.totalRound,
     minPlayer: signUpData.minPlayer,
@@ -34,15 +34,15 @@ function defaultUserData(signUpData: userIf) {
     entryFee: signUpData.entryFee,
     authToken: signUpData.authToken,
     longitude: signUpData.longitude,
-    latitude: signUpData.latitude,
+    latitude:signUpData.latitude,
     fromBack: signUpData.fromBack,
-    isUseBot: signUpData.isUseBot,
-    isBot: signUpData.isBot,
+    isUseBot : signUpData.isUseBot,
+    isBot : signUpData.isBot,
     createdAt: currentTimestamp,
     updatedAt: currentTimestamp,
     socketId: signUpData.socketId,
-    moneyMode: signUpData.moneyMode,
-    isAnyRunningGame: signUpData.isAnyRunningGame || false,
+    moneyMode : signUpData.moneyMode,
+    isAnyRunningGame : signUpData.isAnyRunningGame || false,
   };
   return data;
 }
@@ -52,19 +52,19 @@ const defaultTableData = (data: defaultPlayingTableIf) => {
   const currentTimestamp = new Date();
 
   return {
-    _id: new ObjectId().toString(),
+    _id: ObjectID().toString(),
     gameType: data.gameType,
     totalRounds: data.totalRounds,
     currentRound: NUMERICAL.ONE,
     lobbyId: data.lobbyId.toString(),
     gameId: data.gameId,
-    isUseBot: data.isUseBot,
+    isUseBot : data.isUseBot,
     winningScores: data.winningScores,
     gameStartTimer: data.gameStartTimer,
     userTurnTimer: data.userTurnTimer,
     bootValue: data.bootValue,
     potValue: data.bootValue * NUMERICAL.FOUR,
-    winningAmount: data.winningAmount,
+    winningAmount : data.winningAmount,
     winner: [],
     isFTUE: data.isFTUE,
     createdAt: currentTimestamp,
@@ -72,10 +72,10 @@ const defaultTableData = (data: defaultPlayingTableIf) => {
   };
 };
 interface se {
-  s0?: object;
-  s1: object;
-  s2: object;
-  s3: object;
+  s0?: {};
+  s1: {};
+  s2: {};
+  s3: {};
 }
 const createSeats = async (seat: number): Promise<userSeatsIf> => {
   const seats: any = {};
@@ -96,11 +96,11 @@ const createSeats = async (seat: number): Promise<userSeatsIf> => {
         next(): Promise<asyncIterableIf> {
           const done = i === seat;
           const value = done ? undefined : i++;
-          return Promise.resolve({value, done});
+          return Promise.resolve({ value, done });
         },
         return(): asyncIterableIf {
           // This will be reached if the consumer called 'break' or 'return' early in the loop.
-          return {done: true};
+          return { done: true };
         },
       };
     },
@@ -120,7 +120,7 @@ const defaultRoundTableData = async (data: defaultRoundTableIf) => {
   const currentTimestamp = new Date();
 
   return {
-    _id: new ObjectId().toString(),
+    _id: ObjectID().toString(),
     tableId: data.tableId,
     tableState: TABLE_STATE.WAITING_FOR_PLAYERS,
     tableCurrentTimer: null,
@@ -131,8 +131,8 @@ const defaultRoundTableData = async (data: defaultRoundTableIf) => {
     totalHands: NUMERICAL.THIRTEEN,
     // seats: { s0: {}, s1: {}, s2: {}, s3: {} },
     seats: await createSeats(Number(data.noOfPlayer)),
-    turnCurrentCards: ['U-0', 'U-0', 'U-0', 'U-0'],
-    turnCardSequence: 'N',
+    turnCurrentCards: ["U-0", "U-0", "U-0", "U-0"],
+    turnCardSequence: "N",
     lastInitiater: null,
     dealerPlayer: null,
     breakingSpades: false,
@@ -149,12 +149,12 @@ const defaultRoundTableData = async (data: defaultRoundTableIf) => {
 
 // generates the Playing Player Table default fields for the game Play
 const defaultPlayerGamePlayData = (
-  data: defaultPlayerTableIf | playerPlayingDataIf,
+  data: defaultPlayerTableIf | playerPlayingDataIf
 ) => {
   const currentTimestamp = new Date();
 
   return {
-    _id: new ObjectId().toString(),
+    _id: ObjectID().toString(),
     userObjectId: data._id,
     userId: data.userId,
     username: data.username,
@@ -174,10 +174,10 @@ const defaultPlayerGamePlayData = (
     isLeft: false,
     isAuto: false,
     isTurn: false,
-    isBot: data.isBot,
+    isBot : data.isBot,
     createdAt: currentTimestamp,
     updatedAt: currentTimestamp,
-    roundCards: [],
+    roundCards : []
   };
 };
 

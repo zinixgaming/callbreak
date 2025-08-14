@@ -1,6 +1,6 @@
-import logger from '../../logger';
-import {playerPlayingDataIf} from '../../interface/playerPlayingTableIf';
-import {playingTableIf} from '../../interface/playingTableIf';
+import logger from "../../logger";
+import { playerPlayingDataIf } from "../../interface/playerPlayingTableIf";
+import { playingTableIf } from "../../interface/playingTableIf";
 import {
   formantUserThrowCardShowIf,
   formatCardDistributionIf,
@@ -13,14 +13,14 @@ import {
   formatStartUserTurnIf,
   formatWinnerDeclareIf,
   formentUserBidShowIf,
-} from '../../interface/responseIf';
-import {roundTableIf} from '../../interface/roundTableIf';
-import {eventDataIf} from '../../interface/startRoundIf';
-import {userIf} from '../../interface/userSignUpIf';
-import Validator from '../../Validator';
-import Errors from '../../errors';
-import {EMPTY, NUMERICAL, PLAYER_STATE, TABLE_STATE} from '../../../constants';
-import {userThrowCardTips} from '../../FTUE/common';
+} from "../../interface/responseIf";
+import { roundTableIf } from "../../interface/roundTableIf";
+import { eventDataIf } from "../../interface/startRoundIf";
+import { userIf } from "../../interface/userSignUpIf";
+import Validator from "../../Validator";
+import Errors from "../../errors";
+import { EMPTY, NUMERICAL, PLAYER_STATE, TABLE_STATE } from "../../../constants";
+import { userThrowCardTips } from "../../FTUE/common";
 import {
   mainRoundScoreIf,
   roundScoreIf,
@@ -29,29 +29,25 @@ import {
   userScoreIf,
   userScoreRoundIf,
   userScoreTotalIf,
-} from '../../interface/userScoreIf';
-import {upadedBalanceIf} from '../../interface/responseIf';
-import leaveTable from '../leaveTable';
+} from "../../interface/userScoreIf";
+import { upadedBalanceIf } from '../../interface/responseIf'
+import leaveTable from "../leaveTable";
 
 // Formant Collect Boot Value Event Document
-async function formatCollectBootValue(
-  {userIds}: any,
-  bootValue: number,
-  balance: upadedBalanceIf[],
-) {
+async function formatCollectBootValue({ userIds }: any, bootValue: number, balance: upadedBalanceIf[]) {
   try {
-    let resObj = {bootValue, userIds, balance};
+    let resObj = { bootValue, userIds, balance };
 
-    resObj =
-      await Validator.responseValidator.formatCollectBootValueValidator(resObj);
+    resObj = await Validator.responseValidator.formatCollectBootValueValidator(
+      resObj
+    );
     return resObj;
   } catch (error) {
-    logger.error(
-      userIds,
-      'CATCH_ERROR : formatCollectBootValue :: ',
+    logger.error(userIds, 
+      "CATCH_ERROR : formatCollectBootValue :: ",
       userIds,
       bootValue,
-      error,
+      error
     );
     if (error instanceof Errors.CancelBattle) {
       throw new Errors.CancelBattle(error);
@@ -63,18 +59,19 @@ async function formatCollectBootValue(
 // Formant card Distribution Event Document
 async function formatCardDistribution(data: eventDataIf) {
   try {
-    const {seatIndex, usersCards, dealerId, currentRound} = data;
+    const { seatIndex, usersCards, dealerId, currentRound } = data;
 
     let resObj: formatCardDistributionIf = {
       cards: usersCards[seatIndex],
       dealer: dealerId,
-      currentRound,
+      currentRound
     };
-    resObj =
-      await Validator.responseValidator.formatCardDistributionValidator(resObj);
+    resObj = await Validator.responseValidator.formatCardDistributionValidator(
+      resObj
+    );
     return resObj;
   } catch (error) {
-    logger.error('CATCH_ERROR : formatCardDistribution :: ', data, error);
+    logger.error("CATCH_ERROR : formatCardDistribution :: ", data, error);
     if (error instanceof Errors.CancelBattle) {
       throw new Errors.CancelBattle(error);
     }
@@ -86,20 +83,16 @@ async function formatCardDistribution(data: eventDataIf) {
 const formatGameTableInfo = async (
   tableData: playingTableIf,
   roundTableData: roundTableIf,
-  extra: any,
+  extra: any
 ) => {
   try {
     const seats: any = [];
-    const tempRoundTableData: any = {...roundTableData};
-    Object.keys(tempRoundTableData.seats).map(async key =>
-      seats.push(tempRoundTableData.seats[key]),
+    const tempRoundTableData: any = { ...roundTableData };
+    Object.keys(tempRoundTableData.seats).map(async (key) =>
+      seats.push(tempRoundTableData.seats[key])
     );
     tempRoundTableData.seats = seats;
-    logger.info(
-      roundTableData.tableId,
-      'tempRoundTableData :: ',
-      tempRoundTableData,
-    );
+    logger.info(roundTableData.tableId, "tempRoundTableData :: ", tempRoundTableData);
     let resObj: formatGameTableInfoIf = {
       isRejoin: false,
       isFTUE: tableData.isFTUE,
@@ -117,17 +110,17 @@ const formatGameTableInfo = async (
       seats: tempRoundTableData.seats,
       ...extra,
     };
-    resObj =
-      await Validator.responseValidator.formatGameTableInfoValidator(resObj);
+    resObj = await Validator.responseValidator.formatGameTableInfoValidator(
+      resObj
+    );
     return resObj;
   } catch (error) {
-    logger.error(
-      roundTableData.tableId,
-      'CATCH_ERROR : formatGameTableInfo :: ',
+    logger.error(roundTableData.tableId, 
+      "CATCH_ERROR : formatGameTableInfo :: ",
       tableData,
       roundTableData,
       extra,
-      error,
+      error
     );
     if (error instanceof Errors.CancelBattle) {
       throw new Errors.CancelBattle(error);
@@ -139,7 +132,7 @@ const formatGameTableInfo = async (
 // Formant Join Table Event Document
 async function formatJoinTableInfo(
   seatIndex: number,
-  roundTableData: roundTableIf,
+  roundTableData: roundTableIf
 ) {
   try {
     let data: formatJoinTableInfoIf = {
@@ -155,10 +148,10 @@ async function formatJoinTableInfo(
     return data;
   } catch (error) {
     logger.error(
-      'CATCH_ERROR : formatJoinTableInfo :: ',
+      "CATCH_ERROR : formatJoinTableInfo :: ",
       seatIndex,
       roundTableData,
-      error,
+      error
     );
     if (error instanceof Errors.CancelBattle) {
       throw new Errors.CancelBattle(error);
@@ -171,13 +164,13 @@ async function formatJoinTableInfo(
 async function formatStartUserTurn(
   playerGamePlay: playerPlayingDataIf,
   tableData: playingTableIf,
-  tableGameData: roundTableIf,
+  tableGameData: roundTableIf
 ) {
   try {
-    logger.info('formatStartUserTurn :: ', tableGameData.turnCardSequence);
+    logger.info("formatStartUserTurn :: ", tableGameData.turnCardSequence);
     logger.info(
-      'formatStartUserTurn :: tableGameData.turnCount :',
-      tableGameData.turnCount,
+      "formatStartUserTurn :: tableGameData.turnCount :",
+      tableGameData.turnCount
     );
     let data: formatStartUserTurnIf = {
       seatIndex: playerGamePlay.seatIndex,
@@ -204,11 +197,11 @@ async function formatStartUserTurn(
     return data;
   } catch (error) {
     logger.error(
-      'CATCH_ERROR : formatStartUserTurn :: ',
+      "CATCH_ERROR : formatStartUserTurn :: ",
       playerGamePlay,
       tableData,
       tableGameData,
-      error,
+      error
     );
     if (error instanceof Errors.CancelBattle) {
       throw new Errors.CancelBattle(error);
@@ -219,18 +212,23 @@ async function formatStartUserTurn(
 // Formant Bid Turn Event Document
 async function formatStartUserBidTurn(
   tableData: playingTableIf,
-  seatIndexList: number[],
+  seatIndexList : number[]
 ) {
   try {
     let data: formatStartUserBidTurnIf = {
       time: tableData.userTurnTimer,
-      seatIndexList,
+      seatIndexList
     };
-    data =
-      await Validator.responseValidator.formatStartUserBidTurnValidator(data);
+    data = await Validator.responseValidator.formatStartUserBidTurnValidator(
+      data
+    );
     return data;
   } catch (error) {
-    logger.error('CATCH_ERROR : formatStartUserBidTurn :: ', tableData, error);
+    logger.error(
+      "CATCH_ERROR : formatStartUserBidTurn :: ",
+      tableData,
+      error
+    );
     if (error instanceof Errors.CancelBattle) {
       throw new Errors.CancelBattle(error);
     }
@@ -244,28 +242,28 @@ const formatRejoinTableInfo = async (
   tableData: playingTableIf,
   roundTableData: roundTableIf,
   extra: any,
-  userBalance: number,
+  userBalance: number
 ) => {
-  const tempRoundTableData = {...roundTableData};
+  const tempRoundTableData = { ...roundTableData };
   try {
     let massage = EMPTY;
-    const {getConfigData: config} = global;
+    const { getConfigData: config } = global;
     if (tempRoundTableData.dealerPlayer == null)
       tempRoundTableData.dealerPlayer = -1;
     if (tempRoundTableData.tableCurrentTimer == null)
       tempRoundTableData.tableCurrentTimer = -1;
-    if (roundTableData.tableState === TABLE_STATE.LOCK_IN_PERIOD) {
+    if(roundTableData.tableState === TABLE_STATE.LOCK_IN_PERIOD){
       massage = config.LOCK_IN_PERIOD;
     }
     for (let i = 0; i < Number(tempRoundTableData.noOfPlayer); i++) {
       if (
-        typeof extra[i].seatIndex != 'undefined' &&
+        typeof extra[i].seatIndex != "undefined" &&
         extra[i].seatIndex != playerPlayingData.seatIndex
       ) {
         extra[i].currentCards = [];
         delete extra[i].createdAt;
         delete extra[i].updatedAt;
-      } else if (typeof extra[i].seatIndex != 'undefined') {
+      } else if (typeof extra[i].seatIndex != "undefined") {
         delete extra[i].createdAt;
         delete extra[i].updatedAt;
       }
@@ -292,23 +290,23 @@ const formatRejoinTableInfo = async (
       isBidTurn: tempRoundTableData.isBidTurn,
       currentTurnTimer: tempRoundTableData.currentTurnTimer,
       potValue: tableData.potValue,
-      userBalance: Number(userBalance.toFixed(2)),
-      remaningRoundTimer: tableData.gameStartTimer,
-      massage: massage,
+      userBalance : Number(userBalance.toFixed(2)),
+      remaningRoundTimer : tableData.gameStartTimer,
+      massage : massage,
       playarDetail: extra,
     };
-    data =
-      await Validator.responseValidator.formatRejoinTableInfoValidator(data);
+    data = await Validator.responseValidator.formatRejoinTableInfoValidator(
+      data
+    );
     return data;
   } catch (error) {
-    logger.error(
-      tempRoundTableData.tableId,
-      'CATCH_ERROR : formatRejoinTableInfo :: ',
+    logger.error(tempRoundTableData.tableId, 
+      "CATCH_ERROR : formatRejoinTableInfo :: ",
       playerPlayingData,
       tableData,
       roundTableData,
       extra,
-      error,
+      error
     );
     if (error instanceof Errors.CancelBattle) {
       throw new Errors.CancelBattle(error);
@@ -357,7 +355,7 @@ async function formatSingUpInfo(userData: userIf): Promise<formatSingUpInfoIf> {
     data = await Validator.responseValidator.formatSingUpInfoValidator(data);
     return data;
   } catch (error) {
-    logger.error('CATCH_ERROR : formatSingUpInfo :: ', userData, error);
+    logger.error("CATCH_ERROR : formatSingUpInfo :: ", userData, error);
     if (error instanceof Errors.CancelBattle) {
       throw new Errors.CancelBattle(error);
     }
@@ -367,14 +365,15 @@ async function formatSingUpInfo(userData: userIf): Promise<formatSingUpInfoIf> {
 
 // Formant User Throw Card Show Document
 async function formatUserThrowCardShow(
-  data: formantUserThrowCardShowIf,
+  data: formantUserThrowCardShowIf
 ): Promise<formantUserThrowCardShowIf> {
   try {
-    data =
-      await Validator.responseValidator.formatUserThrowCardShowValidator(data);
+    data = await Validator.responseValidator.formatUserThrowCardShowValidator(
+      data
+    );
     return data;
   } catch (error) {
-    logger.error('CATCH_ERROR : formatUserThrowCardShow :: ', data, error);
+    logger.error("CATCH_ERROR : formatUserThrowCardShow :: ", data, error);
     if (error instanceof Errors.CancelBattle) {
       throw new Errors.CancelBattle(error);
     }
@@ -384,13 +383,13 @@ async function formatUserThrowCardShow(
 
 // Formant User Bid Show Document
 async function formatUserBidShow(
-  data: formentUserBidShowIf,
+  data: formentUserBidShowIf
 ): Promise<formentUserBidShowIf> {
   try {
     data = await Validator.responseValidator.formatUserBidShowValidator(data);
     return data;
   } catch (error) {
-    logger.error('CATCH_ERROR : formatUserBidShow :: ', data, error);
+    logger.error("CATCH_ERROR : formatUserBidShow :: ", data, error);
     if (error instanceof Errors.CancelBattle) {
       throw new Errors.CancelBattle(error);
     }
@@ -400,27 +399,27 @@ async function formatUserBidShow(
 
 async function formatScoreData(
   userScore: userScoreIf[],
-  roundScoreHistory: roundScoreIf[],
+  roundScoreHistory: roundScoreIf[]
   // userDetailInScore: userDetailInScoreIf[],
   // userScoreTotal: userScoreTotalIf[],
 ): Promise<mainRoundScoreIf> {
   const roundScoreWinner: roundScoreWinnerIf[] = [];
   const userDetailInScore: userDetailInScoreIf[] = [];
   const userScoreTotal: userScoreTotalIf[] = [];
-  userScore.forEach(element => {
+  userScore.forEach((element) => {
     // userRoundScore.push({
     //   roundPoint: element.roundPoint,
     //   seatIndex: element.seatIndex,
     // });
-    let userStatus: string = PLAYER_STATE.PLAYING;
-    if (element.isAuto === true) userStatus = PLAYER_STATE.DISCONNECTED;
-    if (element.isLeft === true) userStatus = PLAYER_STATE.LEFT;
+    let userStatus : string = PLAYER_STATE.PLAYING;
+    if(element.isAuto === true) userStatus =  PLAYER_STATE.DISCONNECTED;
+    if(element.isLeft === true) userStatus =  PLAYER_STATE.LEFT;
 
     userDetailInScore.push({
       username: element.username,
       profilePicture: element.profilePicture,
       seatIndex: element.seatIndex,
-      userStatus,
+      userStatus
     });
     userScoreTotal.push({
       totalPoint: Number(element.totalPoint.toFixed(1)),
@@ -428,9 +427,9 @@ async function formatScoreData(
     });
   });
 
-  roundScoreHistory.forEach(element => {
+  roundScoreHistory.forEach((element) => {
     const userScores: userScoreRoundIf[] = [];
-    element.roundScore.forEach(uScore => {
+    element.roundScore.forEach((uScore) => {
       userScores.push({
         roundPoint: Number(uScore.roundPoint.toFixed(1)),
         seatIndex: uScore.seatIndex,
@@ -453,7 +452,7 @@ async function formatScoreData(
 }
 async function formatScoreDataForWinner(
   // userScore: userScoreIf[],
-  roundScoreHistory: roundScoreIf[],
+  roundScoreHistory: roundScoreIf[]
   // userDetailInScore: userDetailInScoreIf[],
   // userScoreTotal: userScoreTotalIf[],
 ): Promise<mainRoundScoreIf> {
@@ -477,33 +476,35 @@ async function formatScoreDataForWinner(
   //   });
   // });
 
-  roundScoreHistory.forEach(element => {
+  roundScoreHistory.forEach((element) => {
     const userScores: userScoreRoundIf[] = [];
-    element.roundScore.forEach(uScore => {
+    element.roundScore.forEach((uScore) => {
+
       // logger.info('uScore :=>> ', uScore);
       userScores.push({
         roundPoint: Number(uScore.roundPoint.toFixed(1)),
         seatIndex: uScore.seatIndex,
       });
 
-      let userStatus: string = PLAYER_STATE.PLAYING;
-      if (uScore.isAuto === true) userStatus = PLAYER_STATE.DISCONNECTED;
-      if (uScore.isLeft === true) userStatus = PLAYER_STATE.LEFT;
+      let userStatus : string = PLAYER_STATE.PLAYING;
+      if(uScore.isAuto === true) userStatus =  PLAYER_STATE.DISCONNECTED;
+      if(uScore.isLeft === true) userStatus =  PLAYER_STATE.LEFT;
 
       userDetailInScore[`${uScore.seatIndex}`] = {
         username: uScore.username,
         profilePicture: uScore.profilePicture,
         seatIndex: uScore.seatIndex,
-        userStatus,
+        userStatus
       };
 
       userScoreTotal[`${uScore.seatIndex}`] = {
-        totalPoint:
-          /*(userScoreTotal[uScore.seatIndex] && userScoreTotal[uScore.seatIndex].totalPoint)
+        totalPoint: 
+            /*(userScoreTotal[uScore.seatIndex] && userScoreTotal[uScore.seatIndex].totalPoint)
             ? (userScoreTotal[uScore.seatIndex].totalPoint += uScore.totalPoint)
             : */ Number(uScore.totalPoint.toFixed(1)),
         seatIndex: uScore.seatIndex,
       };
+
     });
 
     logger.info('userScores :==>> ', userScores);

@@ -11,6 +11,6 @@ const exportObject = {
   rejoinTimerCancel,
   initializeGameplayCancel,
   roundStartTimerCancel,
-  newRoundStartTimerCancel,
+  newRoundStartTimerCancel
 };
 export = exportObject;

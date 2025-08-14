@@ -1,126 +1,93 @@
-import axios from 'axios';
+import axios from "axios"
 import logger from '../logger';
-import {getConfig} from '../../config';
-import {
-  markCompletedGameStatusIf,
-  multiPlayerWinnScoreIf,
-} from '../interface/cmgApiIf';
-import CommonEventEmitter from '../commonEventEmitter';
-import Errors from '../errors';
-import {EVENTS, MESSAGES, NUMERICAL} from '../../constants';
-const {MARK_COMPLETED_GAME_STATUS, APP_KEY, APP_DATA} = getConfig();
+import { getConfig } from "../../config";
+import { markCompletedGameStatusIf, multiPlayerWinnScoreIf } from '../interface/cmgApiIf'
+import CommonEventEmitter from "../commonEventEmitter";
+import Errors from "../errors";
+import { EVENTS, MESSAGES, NUMERICAL } from "../../constants";
+const { MARK_COMPLETED_GAME_STATUS, APP_KEY, APP_DATA } = getConfig();
 
-async function markCompletedGameStatus(
-  data: markCompletedGameStatusIf,
-  token: string,
-  socketId: string,
-): Promise<any> {
-  logger.debug(data.tableId, 'markCompletedGameStatus :: ', data, token);
-  try {
-    const url = MARK_COMPLETED_GAME_STATUS;
-    logger.debug(data.tableId, 'markCompletedGameStatus :: url :', url);
+async function markCompletedGameStatus(data: markCompletedGameStatusIf, token: string, socketId: string): Promise<any> {
 
-    //callbreak only one game finished
-    // const responce = await axios.post(url, data, { headers: { 'Authorization': `${token}`, 'x-mgpapp-key':APP_KEY, 'x-mgpapp-data':APP_DATA } })
+    logger.debug(data.tableId, "markCompletedGameStatus :: ", data, token);
+    try {
+        const url = MARK_COMPLETED_GAME_STATUS;
+        logger.debug(data.tableId, "markCompletedGameStatus :: url :", url);
 
-    //callbreak all game finished
-    const responce = await axios.post(
-      url,
-      {gameId: data.gameId},
-      {
-        headers: {
-          Authorization: `${token}`,
-          'x-mgpapp-key': APP_KEY,
-          'x-mgpapp-data': APP_DATA,
-        },
-      },
-    );
-    logger.info(
-      data.tableId,
-      'markCompletedGameStatus : responce :: ',
-      responce.data,
-    );
 
-    if (!responce || !responce.data.success) {
-      throw new Errors.InvalidInput(
-        'Unable to fetch markCompletedGameStatus data',
-      );
+        //callbreak only one game finished
+        // const responce = await axios.post(url, data, { headers: { 'Authorization': `${token}`, 'x-mgpapp-key':APP_KEY, 'x-mgpapp-data':APP_DATA } })
+
+        //callbreak all game finished
+        const responce = await axios.post(url, { gameId: data.gameId }, { headers: { 'Authorization': `${token}`, 'x-mgpapp-key': APP_KEY, 'x-mgpapp-data': APP_DATA } })
+        logger.info(data.tableId, "markCompletedGameStatus : responce :: ", responce.data);
+
+        if (!responce || !responce.data.success) {
+            throw new Errors.InvalidInput('Unable to fetch markCompletedGameStatus data');
+        }
+        if (responce.data.message === MESSAGES.ERROR.SERVER_UNDER_THE_MAINTENANCE) {
+            logger.info(data.tableId, `Server under the maintenance.`)
+            throw new Errors.UnknownError('Unable to fetch markCompletedGameStatus data');
+        }
+        return responce;
+
+    } catch (error: any) {
+        logger.error(data.tableId, 'CATCH_ERROR : markCompletedGameStatus :>> ', error, "-", data, token);
+
+        if (error instanceof Errors.UnknownError) {
+            let nonProdMsg = "Server under the maintenance!";
+            CommonEventEmitter.emit(EVENTS.SHOW_POPUP, {
+                socket: socketId,
+                data: {
+                    isPopup: true,
+                    popupType: MESSAGES.ALERT_MESSAGE.TYPE.COMMON_POPUP,
+                    title: nonProdMsg,
+                    message: MESSAGES.ERROR.SERVER_UNDER_THE_MAINTENANCE,
+                    buttonCounts: NUMERICAL.ONE,
+                    button_text: [MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.EXIT],
+                    button_color: [MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED],
+                    button_methods: [MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.EXIT],
+                },
+            });
+        }
+        else if (error?.response && error?.response?.data && !error?.response?.data?.success) {
+            let nonProdMsg = "Fetch data failed!";
+            CommonEventEmitter.emit(EVENTS.SHOW_POPUP, {
+                socket: socketId,
+                data: {
+                    isPopup: true,
+                    popupType: MESSAGES.ALERT_MESSAGE.TYPE.COMMON_POPUP,
+                    title: nonProdMsg,
+                    message: error.response.data.message ? error.response.data.message : MESSAGES.ERROR.COMMON_ERROR,
+                    buttonCounts: NUMERICAL.ONE,
+                    button_text: [MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.EXIT],
+                    button_color: [MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED],
+                    button_methods: [MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.EXIT],
+                },
+            });
+        }
+        else {
+            let nonProdMsg = "Fetch data failed!";
+            CommonEventEmitter.emit(EVENTS.SHOW_POPUP, {
+                socket: socketId,
+                data: {
+                    isPopup: true,
+                    popupType: MESSAGES.ALERT_MESSAGE.TYPE.COMMON_POPUP,
+                    title: nonProdMsg,
+                    message: MESSAGES.ERROR.COMMON_ERROR,
+                    buttonCounts: NUMERICAL.ONE,
+                    button_text: [MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.EXIT],
+                    button_color: [MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED],
+                    button_methods: [MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.EXIT],
+                },
+            });
+        }
+        throw error;
     }
-    if (responce.data.message === MESSAGES.ERROR.SERVER_UNDER_THE_MAINTENANCE) {
-      logger.info(data.tableId, `Server under the maintenance.`);
-      throw new Errors.UnknownError(
-        'Unable to fetch markCompletedGameStatus data',
-      );
-    }
-    return responce;
-  } catch (error: any) {
-    logger.error(
-      data.tableId,
-      'CATCH_ERROR : markCompletedGameStatus :>> ',
-      error,
-      '-',
-      data,
-      token,
-    );
-
-    if (error instanceof Errors.UnknownError) {
-      const nonProdMsg = 'Server under the maintenance!';
-      CommonEventEmitter.emit(EVENTS.SHOW_POPUP, {
-        socket: socketId,
-        data: {
-          isPopup: true,
-          popupType: MESSAGES.ALERT_MESSAGE.TYPE.COMMON_POPUP,
-          title: nonProdMsg,
-          message: MESSAGES.ERROR.SERVER_UNDER_THE_MAINTENANCE,
-          buttonCounts: NUMERICAL.ONE,
-          button_text: [MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.EXIT],
-          button_color: [MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED],
-          button_methods: [MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.EXIT],
-        },
-      });
-    } else if (
-      error?.response &&
-      error?.response?.data &&
-      !error?.response?.data?.success
-    ) {
-      const nonProdMsg = 'Fetch data failed!';
-      CommonEventEmitter.emit(EVENTS.SHOW_POPUP, {
-        socket: socketId,
-        data: {
-          isPopup: true,
-          popupType: MESSAGES.ALERT_MESSAGE.TYPE.COMMON_POPUP,
-          title: nonProdMsg,
-          message: error.response.data.message
-            ? error.response.data.message
-            : MESSAGES.ERROR.COMMON_ERROR,
-          buttonCounts: NUMERICAL.ONE,
-          button_text: [MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.EXIT],
-          button_color: [MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED],
-          button_methods: [MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.EXIT],
-        },
-      });
-    } else {
-      const nonProdMsg = 'Fetch data failed!';
-      CommonEventEmitter.emit(EVENTS.SHOW_POPUP, {
-        socket: socketId,
-        data: {
-          isPopup: true,
-          popupType: MESSAGES.ALERT_MESSAGE.TYPE.COMMON_POPUP,
-          title: nonProdMsg,
-          message: MESSAGES.ERROR.COMMON_ERROR,
-          buttonCounts: NUMERICAL.ONE,
-          button_text: [MESSAGES.ALERT_MESSAGE.BUTTON_TEXT.EXIT],
-          button_color: [MESSAGES.ALERT_MESSAGE.BUTTON_COLOR.RED],
-          button_methods: [MESSAGES.ALERT_MESSAGE.BUTTON_METHOD.EXIT],
-        },
-      });
-    }
-    throw error;
-  }
 }
 
 const exportedObj = {
-  markCompletedGameStatus,
+    markCompletedGameStatus,
 };
 
 export = exportedObj;

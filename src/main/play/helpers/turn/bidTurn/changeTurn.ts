@@ -1,52 +1,51 @@
-import logger from '../../../../logger';
-import {getNextPlayer} from '../../../../common';
+import logger from "../../../../logger";
+import { getNextPlayer } from "../../../../common";
 import {
   getTableData,
   getRoundTableData,
   setRoundTableData,
   getPlayerGamePlay,
   setPlayerGamePlay,
-} from '../../../../gameTable/utils';
-import {NUMERICAL, TABLE_STATE} from '../../../../../constants';
-import Scheduler from '../../../../scheduler';
-import {playingTableIf} from '../../../../interface/playingTableIf';
-import {roundTableIf} from '../../../../interface/roundTableIf';
-import {playerPlayingDataIf} from '../../../../interface/playerPlayingTableIf';
-import cancelBattle from '../../../cancelBattle';
-import Errors from '../../../../errors';
+} from "../../../../gameTable/utils";
+import { NUMERICAL, TABLE_STATE } from "../../../../../constants";
+import Scheduler from "../../../../scheduler";
+import { playingTableIf } from "../../../../interface/playingTableIf";
+import { roundTableIf } from "../../../../interface/roundTableIf";
+import { playerPlayingDataIf } from "../../../../interface/playerPlayingTableIf";
+import cancelBattle from "../../../cancelBattle";
+import Errors from "../../../../errors";
 
 // Change User Bid Turn
 const changeTurn = async (tableId: string) => {
-  const {getLock} = global;
+  const { getLock } = global;
   const changeTurnLock = await getLock.acquire([tableId], 2000);
   try {
-    logger.debug(tableId, 'changeTurn : started with tableId :: ', tableId);
+    logger.debug(tableId, "changeTurn : started with tableId :: ", tableId);
     const playTable: playingTableIf = await getTableData(tableId);
-    const {currentRound} = playTable;
+    const { currentRound } = playTable;
     const tableGamePlay: roundTableIf = await getRoundTableData(
       tableId,
-      currentRound,
+      currentRound
     );
 
-    if (tableGamePlay.tableState == TABLE_STATE.SCOREBOARD_DECLARED)
-      return false;
+    if(tableGamePlay.tableState == TABLE_STATE.SCOREBOARD_DECLARED) return false;
 
     const playersGameData: playerPlayingDataIf[] = await Promise.all(
-      Object.keys(tableGamePlay.seats).map(async ele =>
-        getPlayerGamePlay(tableGamePlay.seats[ele].userId, tableId),
-      ),
+      Object.keys(tableGamePlay.seats).map(async (ele) =>
+        getPlayerGamePlay(tableGamePlay.seats[ele].userId, tableId)
+      )
     );
 
     // get Player Object Id Of Next Turn
     const nextTurn: string = await getNextPlayer(
       tableGamePlay.seats,
-      tableGamePlay.currentTurn,
+      tableGamePlay.currentTurn
     );
 
     // next turn player Details
     const playerGamePlay: playerPlayingDataIf = await getPlayerGamePlay(
       nextTurn,
-      tableId,
+      tableId
     );
 
     let bidTurnComplete = false;
@@ -60,7 +59,7 @@ const changeTurn = async (tableId: string) => {
       tableGamePlay.tableState = TABLE_STATE.ROUND_STARTED;
       const nextTurnPlayerData: playerPlayingDataIf = await getPlayerGamePlay(
         nextTurn,
-        tableId,
+        tableId
       );
       nextTurnPlayerData.isTurn = true;
       await setPlayerGamePlay(nextTurn, tableId, nextTurnPlayerData);
@@ -86,11 +85,7 @@ const changeTurn = async (tableId: string) => {
     }
     return true;
   } catch (e) {
-    logger.error(
-      tableId,
-      `CATCH_ERROR : changeTurn : tableId: ${tableId} :: `,
-      e,
-    );
+    logger.error(tableId, `CATCH_ERROR : changeTurn : tableId: ${tableId} :: `, e);
     if (e instanceof Errors.CancelBattle) {
       await cancelBattle({
         tableId,

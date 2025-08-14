@@ -1,9 +1,10 @@
-import {format} from 'winston';
-
-const {printf, timestamp, combine, align} = format;
+const {
+  format: { printf, timestamp, combine, colorize, align },
+} = require('winston');
+const winstonTimestampColorize = require('winston-timestamp-colorize');
 
 const logFormat = printf(
-  ({level, message, timestamp: ts}: any) => `${ts} :: ${level} :: ${message}`,
+  ({ level, message, timestamp: ts, }: any) => `${ts} :: ${level} :: ${message}`,
 );
 
-export = combine(timestamp(), align(), logFormat) as ReturnType<typeof combine>;
+export = combine(timestamp(), align(), logFormat);

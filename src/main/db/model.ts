@@ -1,4 +1,4 @@
-// import Joi from 'joi';
+// const Joi = require('joi');
 // const JoiObjectId = require('joi-oid');
 import logger from '../logger';
 // import { MONGO } from '../../constants';
@@ -54,7 +54,7 @@ class UserProfile {
    * @param {Object} info
    * @returns {Object} create document
    */
-  async add(info: any, opts = {returnOriginal: true}) {
+  async add(info: any, opts = { returnOriginal: true }) {
     try {
       //   const insertObj = super.beforeInsert(info);
       //   const isValidSchema = this.joiSchema().validate(insertObj);
@@ -62,7 +62,7 @@ class UserProfile {
       //   if (isValidSchema.error) throw isValidSchema.error;
 
       const inserteData = await this.collection.insertOne(info, opts);
-      return {_id: inserteData.inserteId, ...inserteData.ops[0]};
+      return { _id: inserteData.inserteId, ...inserteData.ops[0] };
     } catch (error) {
       logger.error(error);
       throw error;
@@ -75,7 +75,7 @@ class UserProfile {
    * @param {Object} opts
    * @returns
    */
-  async bulkAdd(users: any, opts = {returnOriginal: false}) {
+  async bulkAdd(users: any, opts = { returnOriginal: false }) {
     // const usersArray = users.map((e: any) => {
     //   const user = super.beforeInsert(e);
     //   const isValidSchema = this.joiSchema().validate(user);
@@ -91,19 +91,19 @@ class UserProfile {
    * @param {Object} info
    * @returns {Object} updated document
    */
-  async update(_id: any, info: any, opts = {returnOriginal: false}) {
+  async update(_id: any, info: any, opts = { returnOriginal: false }) {
     // const updateObj = super.beforeUpdate(info.$set);
     // const isValidSchema = this.joiSchema().validate(updateObj);
     // if (isValidSchema.error) throw isValidSchema.error;
     return this.collection.findOneAndUpdate(
-      {_id},
+      { _id },
       info,
       //   { $set: isValidSchema.value },
       opts,
     );
   }
 
-  async updateByCond(where: any, info: any, opts = {returnOriginal: false}) {
+  async updateByCond(where: any, info: any, opts = { returnOriginal: false }) {
     // const updateObj = super.beforeUpdate(info.$set);
     // const isValidSchema = this.joiSchema().validate(updateObj);
     // if (isValidSchema.error) throw isValidSchema.error;

@@ -1,5 +1,6 @@
-import _ from 'underscore';
-import logger from '../logger';
+/* eslint-disable prefer-destructuring */
+const _ = require("underscore");
+import logger from "../logger";
 import {
   EMPTY,
   EVENTS,
@@ -7,108 +8,79 @@ import {
   MESSAGES,
   NUMERICAL,
   TABLE_STATE,
-} from '../../constants';
-import {INITIAL_BID_TURN_SETUP_TIMER_EXPIRED} from '../../constants/eventEmitter';
-import {startUserBidTurn, chooseDealer} from './helpers';
-import {getUserByObjectId} from '../signUp/userProfile';
-import {getNextPlayer} from '../common';
-import distributeCards from './helpers/distributeCards';
-import CommonEventEmitter from '../commonEventEmitter';
-import {updateCardsByRoundId} from '../playerGamePlay';
-import {formatCardDistribution} from './helpers/playHelper';
-import Scheduler from '../scheduler';
-import {
-  getPlayerGamePlay,
-  getUser,
-  setPlayerGamePlay,
-  setUser,
-  updateRoundTableData,
-} from '../gameTable/utils';
-import {playerPlayingDataIf} from '../interface/playerPlayingTableIf';
-import {roundStartTimerIf} from '../interface/schedulerIf';
-import {eventDataIf} from '../interface/startRoundIf';
-import cancelBattle from './cancelBattle';
-import Errors from '../errors';
-import {addTurnHistory} from './history';
+} from "../../constants";
+import { INITIAL_BID_TURN_SETUP_TIMER_EXPIRED } from "../../constants/eventEmitter";
+import { startUserBidTurn, chooseDealer } from "./helpers";
+import { getUserByObjectId } from "../signUp/userProfile";
+import { getNextPlayer } from "../common";
+import distributeCards from "./helpers/distributeCards";
+import CommonEventEmitter from "../commonEventEmitter";
+import { updateCardsByRoundId } from "../playerGamePlay";
+import { formatCardDistribution } from "./helpers/playHelper";
+import Scheduler from "../scheduler";
+import { getPlayerGamePlay, getUser, setPlayerGamePlay, setUser, updateRoundTableData } from "../gameTable/utils";
+import { playerPlayingDataIf } from "../interface/playerPlayingTableIf";
+import { roundStartTimerIf } from "../interface/schedulerIf";
+import { eventDataIf } from "../interface/startRoundIf";
+import cancelBattle from "./cancelBattle";
+import Errors from "../errors";
+import { addTurnHistory } from "./history";
 
 /**
  * start round for players
  */
-async function startRound(
-  data: roundStartTimerIf,
-  counter: number = 1,
-  nextTurn: string = EMPTY,
-  dealerIndex: number = NUMERICAL.ZERO,
-  dealerId: string = EMPTY,
-) {
-  logger.debug('startRound : data :: ', data);
-  const {roundTableData, tableData} = data;
+async function startRound(data: roundStartTimerIf, counter:number = 1, nextTurn : string = EMPTY, dealerIndex:number = NUMERICAL.ZERO, dealerId:string = EMPTY) {
+  logger.debug("startRound : data :: ", data);
+  const { roundTableData, tableData } = data;
   const tableId = tableData._id;
-  const {getLock} = global;
+  const { getLock } = global;
   const startRoundLock = await getLock.acquire([tableId], 2000);
   try {
-    const {seats} = roundTableData;
-    const {currentRound} = tableData;
+    const { seats } = roundTableData;
+    const { currentRound } = tableData;
 
-    logger.info(
-      tableId,
-      'counter :',
-      counter,
-      'currentRound :: ',
-      currentRound,
-    );
-    logger.info(
-      tableId,
-      'nextTurn :',
-      nextTurn,
-      'dealerIndex :: ',
-      dealerIndex,
-      'dealerId :: ',
-      dealerId,
-    );
+    logger.info(tableId, "counter :", counter, "currentRound :: ", currentRound);
+    logger.info(tableId, "nextTurn :", nextTurn, "dealerIndex :: ", dealerIndex, "dealerId :: ", dealerId);
 
     const promises: playerPlayingDataIf[] = await Promise.all(
-      Object.keys(seats).map(async key =>
-        getUserByObjectId(tableId, seats[key].userId),
-      ),
+      Object.keys(seats).map(async (key) =>
+        getUserByObjectId(tableId, seats[key].userId)
+      )
     );
-
+    
     if (counter === 1) {
-      const dealerData = await chooseDealer(
+
+      let dealerData = await chooseDealer(
         seats,
         roundTableData.dealerPlayer,
-        tableData.isFTUE,
+        tableData.isFTUE
       );
       dealerId = dealerData.dealerId;
       dealerIndex = dealerData.dealerIndex;
-      logger.info('startRound : dealerId :: ', dealerId);
-      logger.info('startRound : promises :: ', promises);
+      logger.info("startRound : dealerId :: ", dealerId);
+      logger.info("startRound : promises :: ", promises);
       let dealerObj: playerPlayingDataIf[] | playerPlayingDataIf =
-        promises.filter(user => user.userId === dealerId);
-      logger.info('startRound : dealerObj :: ', dealerObj);
+        promises.filter((user) => user.userId === dealerId);
+      logger.info("startRound : dealerObj :: ", dealerObj);
       if (Array.isArray(dealerObj)) dealerObj = dealerObj[0];
-      logger.info('startRound : dealerObj : 111 :: ', dealerObj);
+      logger.info("startRound : dealerObj : 111 :: ", dealerObj);
       nextTurn = await getNextPlayer(seats, dealerObj.userId);
 
       const nextTurnPlayerInfo: playerPlayingDataIf[] = promises.filter(
-        user => user.userId === nextTurn,
+        (user) => user.userId === nextTurn
       );
-      logger.info('startRound : nextTurnPlayerInfo :: ', nextTurnPlayerInfo);
+      logger.info("startRound : nextTurnPlayerInfo :: ", nextTurnPlayerInfo);
 
       nextTurnPlayerInfo[0].isFirstTurn = true;
 
       logger.info(
         nextTurn,
-        ' : startRound : nextTurnPlayerInfo :: ',
-        nextTurnPlayerInfo,
+        " : startRound : nextTurnPlayerInfo :: ",
+        nextTurnPlayerInfo
       );
       await setPlayerGamePlay(nextTurn, tableId, nextTurnPlayerInfo[0]);
       const playersData = promises;
-      const usersCards = await distributeCards(
-        playersData,
-        tableData.isFTUE,
-        counter,
-      );
+      const usersCards = await distributeCards(playersData, tableData.isFTUE, counter);
       logger.info('usersCards : =>> ', usersCards);
 
       await updateRoundTableData(
@@ -118,23 +90,20 @@ async function startRound(
           tableState: TABLE_STATE.START_DEALING_CARD,
           potValue: tableData.bootValue * roundTableData.seats.length,
         },
-        {currentRound, tableId},
+        { currentRound, tableId }
       );
+
     }
 
     const playersData = promises;
-    const usersCards = await distributeCards(
-      playersData,
-      tableData.isFTUE,
-      counter,
-    );
-    logger.info(tableId, 'usersCards : =>> ', usersCards);
+    const usersCards = await distributeCards(playersData, tableData.isFTUE, counter);
+    logger.info(tableId,'usersCards : =>> ', usersCards);
 
     // RETURNS ARRAY containing playerGamePlay data
     const playerGamePlayData = await updateCardsByRoundId(
       seats,
       usersCards,
-      tableId,
+      tableId
     );
     /**
      * this function moves the dealer to index 0 in array while keeping the order
@@ -165,7 +134,7 @@ async function startRound(
       // }
 
       // Send Show My Card Event
-      logger.info(tableId, 'startRound : player :: ', player);
+      logger.info(tableId, "startRound : player :: ", player);
       const formattedData = await formatCardDistribution(eventData);
 
       // const userDetail = await getUser(playersData[i].userId)
@@ -184,14 +153,13 @@ async function startRound(
       });
     }
 
-    logger.info(
-      tableId,
-      'startRound : tableData :: ',
+    logger.info(tableId, 
+      "startRound : tableData :: ",
       tableData,
-      ' playerGamePlayData :: ',
+      " playerGamePlayData :: ",
       playerGamePlayData,
-      ' nextTurn :: ',
-      nextTurn,
+      " nextTurn :: ",
+      nextTurn
     );
 
     /*
@@ -212,14 +180,13 @@ async function startRound(
         playerGamePlayData,
         nextTurn,
         dealerIndex,
-        dealerId,
+        dealerId
       });
     }
   } catch (e) {
-    logger.error(
-      tableId,
+    logger.error(tableId, 
       `CATCH_ERROR : startRound :: tableId: ${tableId} :: roundID: ${roundTableData._id} :`,
-      e,
+      e
     );
     if (e instanceof Errors.CancelBattle) {
       await cancelBattle({
@@ -234,15 +201,9 @@ async function startRound(
 
 // get from Scheduler after timer complete
 CommonEventEmitter.on(INITIAL_BID_TURN_SETUP_TIMER_EXPIRED, (res: any) => {
-  logger.info('call on INITIAL_BID_TURN_SETUP_TIMER_EXPIRED.', res);
+  logger.info("call on INITIAL_BID_TURN_SETUP_TIMER_EXPIRED.", res);
 
-  startUserBidTurn(
-    res.tableData,
-    res.playerGamePlayData,
-    res.nextTurn,
-    res.dealerIndex,
-    res.dealerId,
-  );
+  startUserBidTurn(res.tableData, res.playerGamePlayData, res.nextTurn, res.dealerIndex, res.dealerId);
 });
 /**
  * exported functions

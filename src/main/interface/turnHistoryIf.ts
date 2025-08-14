@@ -52,7 +52,7 @@ export interface bidHistoryIf {
 export interface roundDetailsInterface {
   roundNo: number;
   roundId: string;
-  winnerId: (string | '')[];
+  winnerId: (string | "")[];
   winnerSI: any[];
   createdOn: string;
   modifiedOn: string;

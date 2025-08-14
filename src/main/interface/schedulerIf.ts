@@ -1,7 +1,7 @@
-import {botGameConfigIf} from './botIf';
-import {playerPlayingDataIf} from './playerPlayingTableIf';
-import {playingTableIf} from './playingTableIf';
-import {roundTableIf} from './roundTableIf';
+import { botGameConfigIf } from "./botIf";
+import { playerPlayingDataIf } from "./playerPlayingTableIf";
+import { playingTableIf } from "./playingTableIf";
+import { roundTableIf } from "./roundTableIf";
 
 export interface initializeGameplayIf {
   timer: number;
@@ -33,7 +33,7 @@ export interface playerBidTurnTimerIf {
   timer: number;
   jobId: string;
   tableData: playingTableIf;
-  playerGamePlay?: playerPlayingDataIf;
+  playerGamePlay?: playerPlayingDataIf,
 }
 
 export interface playerTurnTimerIf {
