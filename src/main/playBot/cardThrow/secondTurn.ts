@@ -1,8 +1,7 @@
-import { CARD_SEQUENCE } from '../../../constants';
-import logger from '../../logger';
-import { getCardNumber } from '../../play/helpers/turn/cardThrow/utile';
+import {CARD_SEQUENCE} from '../../../constants';
+import {getCardNumber} from '../../play/helpers/turn/cardThrow/utile';
 
-// tack second turn for bot
+// Second turn logic for bot
 async function secondTurn(
   userCards: string[],
   cardSequence: string,
@@ -10,103 +9,75 @@ async function secondTurn(
 ): Promise<number> {
   let indexSequence: number = -1;
 
-  const seaquenceCardCheck: string[] = userCards
-    .map((fcard: string) => {
-      if (fcard.charAt(0) === cardSequence) {
-        return fcard;
-      }
-      return '';
-    })
-    .filter((e) => e);
-
-  const getSpadesCard: string[] = userCards
-    .map((fcard: string) => {
-      if (fcard.split('-')[0] === CARD_SEQUENCE.CARD_SPADES) return fcard;
-      else return '';
-    })
-    .filter((e: string) => e);
-
-  const spadesHighCardCheck: string | undefined = roundCurrentCards.find(
-    (fcard) => {
-      return (
-        fcard.charAt(0) === CARD_SEQUENCE.CARD_SPADES &&
-        cardSequence !== CARD_SEQUENCE.CARD_SPADES
-      );
-    },
+  // Filter out unplayed/placeholder cards like "U-0"
+  const validRoundCards = roundCurrentCards.filter(
+    c => c.includes('-') && c.split('-')[1] !== '0',
   );
 
-  let hightCardCheck: string[] = [];
-  // if bot not have a same seaquence card and any other user throw a spades card
-  if (seaquenceCardCheck.length === 0 && spadesHighCardCheck) {
-    roundCurrentCards.sort((a, b) => {
-      const cardA =
-        Number(a.split('-')[1]) === 1 &&
-        a.split('-')[0] === CARD_SEQUENCE.CARD_SPADES
-          ? 14
-          : a.split('-')[0] === CARD_SEQUENCE.CARD_SPADES
-          ? Number(a.split('-')[1])
-          : 0;
-      const cardB =
-        Number(b.split('-')[1]) === 1 &&
-        b.split('-')[0] === CARD_SEQUENCE.CARD_SPADES
-          ? 14
-          : b.split('-')[0] === CARD_SEQUENCE.CARD_SPADES
-          ? Number(b.split('-')[1])
-          : 0;
-      return cardB - cardA;
-    });
-    const userHaveSpadeHighCardOrNot = userCards.find(
-      (dcard) =>
-        dcard.charAt(0) === CARD_SEQUENCE.CARD_SPADES &&
-        getCardNumber(dcard) > getCardNumber(roundCurrentCards[0]),
+  // Cards matching the required suit
+  const sameSuitCards: string[] = userCards.filter(
+    fcard => fcard.split('-')[0] === cardSequence,
+  );
+
+  // All spade cards
+  const spadesCards: string[] = userCards.filter(
+    fcard => fcard.split('-')[0] === CARD_SEQUENCE.CARD_SPADES,
+  );
+
+  // Check if someone already played a spade in this turn (when suit is not spades)
+  const spadesHighCardPlayed = validRoundCards.find(
+    fcard =>
+      fcard.split('-')[0] === CARD_SEQUENCE.CARD_SPADES &&
+      cardSequence !== CARD_SEQUENCE.CARD_SPADES,
+  );
+
+  let chosenCard: string | undefined;
+
+  // CASE 1: No same-suit card & spade already played
+  if (sameSuitCards.length === 0 && spadesHighCardPlayed) {
+    // Sort spades in round to find highest
+    const highestSpadeInRound = [...validRoundCards]
+      .filter(c => c.split('-')[0] === CARD_SEQUENCE.CARD_SPADES)
+      .sort((a, b) => getCardNumber(b) - getCardNumber(a))[0];
+
+    // Bot has a spade higher than the current highest spade
+    const higherSpade = spadesCards.find(
+      c => getCardNumber(c) > getCardNumber(highestSpadeInRound),
     );
 
-    // bot have a high spades card
-    if (userHaveSpadeHighCardOrNot) {
-      hightCardCheck = [userHaveSpadeHighCardOrNot];
+    if (higherSpade) {
+      chosenCard = higherSpade; // Win with high spade
     } else {
-      // bot not have a high spades card
-      const noSpadesCard = userCards.find(
-        (dcard) => dcard.charAt(0) !== CARD_SEQUENCE.CARD_SPADES,
+      // Throw lowest non-spade if possible
+      const nonSpade = userCards.find(
+        c => c.split('-')[0] !== CARD_SEQUENCE.CARD_SPADES,
       );
-      // non spades card
-      if (noSpadesCard) hightCardCheck = [noSpadesCard];
-      else {
-        const spadesCard = userCards.find(
-          (dcard) => dcard.charAt(0) === CARD_SEQUENCE.CARD_SPADES,
-        );
-        // any spades card
-        if (spadesCard) hightCardCheck = [spadesCard];
-      }
+      chosenCard = nonSpade || spadesCards[0];
     }
-  } else if (seaquenceCardCheck.length > 0) {
-    hightCardCheck = seaquenceCardCheck.sort((Acard: string, Bcard: string) => {
-      const aCard = getCardNumber(Acard);
-      const bCard = getCardNumber(Bcard);
-      return bCard - aCard;
-    });
 
-    // throw hight card as same suit
-  } else if (getSpadesCard.length > 0) {
-    hightCardCheck = getSpadesCard.sort((Acard: string, Bcard: string) => {
-      const aCard = getCardNumber(Acard);
-      const bCard = getCardNumber(Bcard);
-      return bCard - aCard;
-    });
+    // CASE 2: Has same suit — throw highest of that suit
+  } else if (sameSuitCards.length > 0) {
+    chosenCard = [...sameSuitCards].sort(
+      (a, b) => getCardNumber(b) - getCardNumber(a),
+    )[0];
 
-    // throw hight spades card
+    // CASE 3: No same suit, throw highest spade
+  } else if (spadesCards.length > 0) {
+    chosenCard = [...spadesCards].sort(
+      (a, b) => getCardNumber(b) - getCardNumber(a),
+    )[0];
+
+    // CASE 4: No spades, throw highest card overall
   } else {
-    hightCardCheck = userCards.sort((Acard: string, Bcard: string) => {
-      const aCard = getCardNumber(Acard);
-      const bCard = getCardNumber(Bcard);
-      return bCard - aCard;
-    });
-    // throw hight card
+    chosenCard = [...userCards].sort(
+      (a, b) => getCardNumber(b) - getCardNumber(a),
+    )[0];
   }
 
-  indexSequence = userCards.findIndex(
-    (scard: string) => scard === hightCardCheck[0],
-  );
+  // Find index of chosen card in original userCards array
+  if (chosenCard) {
+    indexSequence = userCards.findIndex(c => c === chosenCard);
+  }
 
   return indexSequence;
 }

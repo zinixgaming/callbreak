@@ -2,50 +2,51 @@ import {CARD_SEQUENCE, NUMERICAL} from '../../../constants';
 import {playerPlayingDataIf} from '../../interface/playerPlayingTableIf';
 import {getCardNumber} from '../../play/helpers/turn/cardThrow/utile';
 
-// tack first for bot
+// First turn logic for bot
 async function firstTurn(
   playerGamePlay: playerPlayingDataIf,
   userCards: string[],
 ): Promise<number> {
-  let indexSequence: number = -1;
-  const {bid, currentCards} = playerGamePlay;
-  //   const { bid, userId } = playerGamePlay;
-  const getLowest: string[] = userCards.sort((Acard: string, Bcard: string) => {
-    const aCard = getCardNumber(Acard);
-    const bCard = getCardNumber(Bcard);
-    return aCard - bCard;
-  });
-  const getLowestWithOutSpades: string[] = getLowest
-    .map((fcard: string) => {
-      if (fcard.split('-')[0] !== CARD_SEQUENCE.CARD_SPADES) return fcard;
-      else return '';
-    })
-    .filter((e: string) => e);
+  let indexSequence = -1;
+  const {bid} = playerGamePlay;
+
+  // Remove any placeholders (e.g., "U-0") from userCards just in case
+  const validUserCards = userCards.filter(
+    c => c.includes('-') && c.split('-')[1] !== '0',
+  );
+
+  // Sort lowest to highest by value
+  const sortedCards = [...validUserCards].sort(
+    (a, b) => getCardNumber(a) - getCardNumber(b),
+  );
+
+  // Same list but without spades
+  const sortedWithoutSpades = sortedCards.filter(
+    c => c.split('-')[0] !== CARD_SEQUENCE.CARD_SPADES,
+  );
+
+  let chosenCard: string | undefined;
+
+  // If bid is 1 — play safe, throw lowest
   if (bid === NUMERICAL.ONE) {
-    if (getLowestWithOutSpades.length === 0) {
-      // throw spades lowest card
-      indexSequence = userCards.findIndex(
-        (scard: string) => scard === getLowest[0],
-      );
+    if (sortedWithoutSpades.length > 0) {
+      chosenCard = sortedWithoutSpades[0]; // lowest non-spade
     } else {
-      // throw lowest card
-      indexSequence = userCards.findIndex(
-        (scard: string) => scard === getLowestWithOutSpades[0],
-      );
+      chosenCard = sortedCards[0]; // lowest spade
     }
+
+    // If bid is more than 1 — play aggressively
   } else {
-    if (getLowestWithOutSpades.length === 0) {
-      // throw spades High card
-      indexSequence = userCards.findIndex(
-        (scard: string) => scard === getLowest[getLowest.length - 1],
-      );
+    if (sortedWithoutSpades.length > 0) {
+      chosenCard = sortedWithoutSpades[sortedWithoutSpades.length - 1]; // highest non-spade
     } else {
-      // throw High card
-      indexSequence = userCards.findIndex(
-        (scard: string) =>
-          scard === getLowestWithOutSpades[getLowestWithOutSpades.length - 1],
-      );
+      chosenCard = sortedCards[sortedCards.length - 1]; // highest spade
     }
+  }
+
+  // Find chosen card's index in the original userCards array
+  if (chosenCard) {
+    indexSequence = userCards.findIndex(c => c === chosenCard);
   }
 
   return indexSequence;
