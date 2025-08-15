@@ -44,7 +44,11 @@ async function botCardThrow(
       indexSequence = await firstTurn(playerGamePlay, userCards);
     } else {
       console.log('\n\nThis is user cards:------------');
-      console.log(userCards);
+      console.log({
+        userCards,
+        cardSequence,
+        roundCurrentCards,
+      });
       console.log('This is round cards:------------\n\n');
 
       // second card throw
