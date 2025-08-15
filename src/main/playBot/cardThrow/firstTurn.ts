@@ -1,7 +1,6 @@
-import { CARD_SEQUENCE, NUMERICAL } from '../../../constants';
-import { playerPlayingDataIf } from '../../interface/playerPlayingTableIf';
-import logger from '../../logger';
-import { getCardNumber } from '../../play/helpers/turn/cardThrow/utile';
+import {CARD_SEQUENCE, NUMERICAL} from '../../../constants';
+import {playerPlayingDataIf} from '../../interface/playerPlayingTableIf';
+import {getCardNumber} from '../../play/helpers/turn/cardThrow/utile';
 
 // tack first for bot
 async function firstTurn(
@@ -9,7 +8,7 @@ async function firstTurn(
   userCards: string[],
 ): Promise<number> {
   let indexSequence: number = -1;
-  const { bid, currentCards } = playerGamePlay;
+  const {bid, currentCards} = playerGamePlay;
   //   const { bid, userId } = playerGamePlay;
   const getLowest: string[] = userCards.sort((Acard: string, Bcard: string) => {
     const aCard = getCardNumber(Acard);
@@ -48,21 +47,6 @@ async function firstTurn(
       );
     }
   }
-
-  // let card = '';
-  // if (indexSequence !== -1) {
-  //   card = userCards[indexSequence];
-  // } else {
-  //   card = userCards[0];
-  // }
-  // logger.info('cardThrowTurnExpire : card :: ', card);
-  // const cardIndex = currentCards.indexOf(card);
-  // if (cardIndex === -1) throw new Error('current card is not your !');
-
-  // const sendObject = {
-  //   cardIndex,
-  //   card,
-  // };
 
   return indexSequence;
 }

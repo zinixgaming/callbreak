@@ -59,7 +59,7 @@ async function setBidOnTurnExpire(tableData: playingTableIf) {
           bid = getRandomNumber(1, 4);
         } else {
           // Use intelligent bid calculation based on player's current cards
-          bid = calculateBotBid(player.currentCards);
+          bid = player.isBot ? calculateBotBid(player.currentCards) : 1;
         }
 
         player.bid = bid;
